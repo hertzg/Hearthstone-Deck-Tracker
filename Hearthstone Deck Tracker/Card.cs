@@ -20,6 +20,12 @@ namespace Hearthstone_Deck_Tracker
         [XmlIgnore]
         public int InHandCount;
 
+        [XmlIgnore] 
+        public bool IsGuess;
+
+        [XmlIgnore]
+        public bool NotInGuess;
+
         public int Height
         {
             get { return (int)(OverlayWindow.Scaling * 35); }
@@ -48,6 +54,11 @@ namespace Hearthstone_Deck_Tracker
         {
             get { return _count ?? 1; }
             set { _count = value; }
+        }
+
+        public double Opacity
+        {
+            get { return IsGuess ? 0.5 : 1; }
         }
 
         public SolidColorBrush ColorPlayer
@@ -119,6 +130,13 @@ namespace Hearthstone_Deck_Tracker
                     {
                         group.Children.Add(
                             new ImageDrawing(new BitmapImage(new Uri("Images/dark.png", UriKind.Relative)),
+                                             new Rect(0, 0, 218, 35)));
+                    }
+
+                    if (NotInGuess)
+                    {
+                        group.Children.Add(
+                            new ImageDrawing(new BitmapImage(new Uri("Images/red.png", UriKind.Relative)),
                                              new Rect(0, 0, 218, 35)));
                     }
 

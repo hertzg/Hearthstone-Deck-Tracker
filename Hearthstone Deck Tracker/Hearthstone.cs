@@ -15,7 +15,6 @@ namespace Hearthstone_Deck_Tracker
         //dont like this solution, cant think of better atm
         public static bool HighlightCardsInHand;
 
-
         private readonly Dictionary<string, Card> _cardDb;
         public ObservableCollection<Card> EnemyCards;
         public int EnemyHandCount;
@@ -28,6 +27,10 @@ namespace Hearthstone_Deck_Tracker
         public string PlayingAs;
         public bool OpponentHasCoin;
         public bool IsUsingPremade;
+
+        private Decks _popularDecks;
+        private XmlManager<Decks> _xmlManagerPopularDecks;
+        public ObservableCollection<Card> OpponentCardsWithGuesses; 
 
         public int[] OpponentHand { get; private set; }
 
@@ -66,7 +69,27 @@ namespace Hearthstone_Deck_Tracker
             {
                 OpponentHand[i] = -1;
             }
-            
+            OpponentCardsWithGuesses = new ObservableCollection<Card>();
+            _xmlManagerPopularDecks = new XmlManager<Decks>();
+            _xmlManagerPopularDecks.Type = typeof (Decks);
+            try
+            {
+                if (!File.Exists("PopularDecks.xml"))
+                {
+                    //avoid overwriting decks file with new releases.
+                    using (var sr = new StreamWriter("PopularDecks.xml", false))
+                    {
+                        sr.WriteLine("<Decks></Decks>");
+                    }
+                }
+                _popularDecks = _xmlManagerPopularDecks.Load("PopularDecks.xml");
+            }
+            catch (Exception)
+            {
+                _popularDecks = new Decks();
+            }
+
+
             LoadCardDb();
         }
 
@@ -199,6 +222,8 @@ namespace Hearthstone_Deck_Tracker
                 card.Count++;
             }
             EnemyCards.Add(card);
+
+            GuessOpponentDeck();
         }
         
         public void Mulligan(string cardId)
@@ -340,7 +365,16 @@ namespace Hearthstone_Deck_Tracker
             {
                 OpponentHand[i] = -1;
             }
-           
+
+            OpponentCardsWithGuesses.Clear();
+            try
+            {
+                _popularDecks = _xmlManagerPopularDecks.Load("PopularDecks.xml");
+            }
+            catch (Exception)
+            {
+                _popularDecks = new Decks();
+            }
         }
 
         //private int handPosIndex;
@@ -379,6 +413,97 @@ namespace Hearthstone_Deck_Tracker
         public List<int> GetOpponentHandAge()
         {
             return OpponentHand.Where(x => x != -1).ToList();
+        }
+
+
+
+        private void GuessOpponentDeck()
+        {
+            Deck bestGuess = new Deck();
+            int matches = 0;
+            int missMatches = 0;
+            foreach (var deck in _popularDecks.DecksList)
+            {
+                int deckMatches = 0;
+                int deckMissMatches = 0;
+                foreach (var enemyCard in EnemyCards)
+                {
+                    if (deck.Cards.Contains(enemyCard))
+                    {
+                        var card = deck.Cards.First(c => c.Equals(enemyCard));
+                        if (enemyCard.Count > card.Count)
+                        {
+                            deckMatches++;
+                            deckMissMatches++;
+                        }
+                        else
+                        {
+                            deckMatches += card.Count;
+                        }
+                    }
+                }
+                if (deckMatches - deckMissMatches > matches - missMatches)
+                {
+                    matches = deckMatches;
+                    missMatches = deckMissMatches;
+                    bestGuess = deck;
+                }
+            }
+
+            Debug.WriteLine(string.Format("Best guess:{0}", bestGuess.Name));
+
+            OpponentCardsWithGuesses.Clear();
+            foreach (var card in EnemyCards)
+            {
+                var newCard = card;
+                if (!bestGuess.Cards.Contains(newCard))
+                {
+                    newCard.NotInGuess = true;
+                }
+                OpponentCardsWithGuesses.Add(newCard);
+            }
+            foreach (var card in bestGuess.Cards)
+            {
+                if (card.Type != "Minion" && card.Type != "Spell" && card.Type != "Weapon" &&
+                    !Helper.IsNumeric(card.Id.ElementAt(card.Id.Length - 1)) &&
+                    !Helper.IsNumeric(card.Id.ElementAt(card.Id.Length - 2)) &&
+                    _invalidCardIds.Any(id => card.Id.Contains(id))) continue;
+
+                var newCard = card;
+                newCard.IsGuess = true;
+
+                if (EnemyCards.Contains(card))
+                {
+                    var enemyCard = EnemyCards.First(c => c.Equals(card));
+                    var countDiff = card.Count - enemyCard.Count;
+                    if (countDiff > 0)
+                    {
+                        newCard.Count = countDiff;
+                        OpponentCardsWithGuesses.Add(newCard);
+                    }
+                }
+                else
+                {
+                    OpponentCardsWithGuesses.Add(newCard);
+                }
+            }
+
+        }
+
+        public void AddPopularDeck(Deck deck)
+        {
+            if (!_popularDecks.DecksList.Contains(deck))
+            {
+                _popularDecks.DecksList.Add(deck);
+            }
+            else
+                Debug.WriteLine("Popular deck already exists");
+        }
+
+        public void SavePopularDecks()
+        {
+            _xmlManagerPopularDecks.Save("PopularDecks.xml", _popularDecks);
+            
         }
     }
 }

@@ -301,7 +301,7 @@ namespace Hearthstone_Deck_Tracker
             }
         }
 
-        public async Task<List<string>> GetPopularDeckLists()
+        public async Task<List<string>> GetPopularDeckLists2()
         {
             string url = @"http://hearthstats.net/decks/public?class=&items=500&sort=num_users&order=desc";
 
@@ -315,6 +315,51 @@ namespace Hearthstone_Deck_Tracker
                     deckUrls.Add(@"http://www.hearthstats.net/" + hrefAttr.Value);
             }
             
+            return deckUrls;
+        }
+        public async Task<List<string>> GetPopularDeckLists()
+        {
+            //string url = @"http://hearthstats.net/decks/public?class=&items=500&sort=num_users&order=desc";
+
+            var url = @"http://www.hearthpwn.com/decks?filter-deck-tag=1&filter-is-forge=2&filter-latest-patch=1&page=";
+
+
+            var deckUrls = new List<string>();
+
+            const int pages = 5;
+            /*for (int i = 1; i < pages; i++)
+            {
+                var doc = await GetHtmlDoc(url + i);
+                foreach (var node in doc.DocumentNode.SelectNodes("//div//span[contains(@class,'tip')]//a"))
+                {
+                    var hrefAttr = node.Attributes.FirstOrDefault(a => a.Name == "href");
+                    if (hrefAttr != null)
+                        deckUrls.Add(@"http://www.hearthpwn.com" + hrefAttr.Value);
+                }
+            }*/
+            //Parallel.For(0, pages, async i =>
+                //{
+            for (int i = 0; i < pages; i++)
+            {
+                try
+                {
+                    var doc = await GetHtmlDoc(url + i);
+                    foreach (var node in doc.DocumentNode.SelectNodes("//div//span[contains(@class,'tip')]//a"))
+                    {
+                        var hrefAttr = node.Attributes.FirstOrDefault(a => a.Name == "href");
+                        if (hrefAttr != null)
+                            deckUrls.Add(@"http://www.hearthpwn.com" + hrefAttr.Value);
+                    }
+                    Debug.WriteLine("Go page " + i + " / " + pages);
+                }
+                catch (Exception)
+                {
+                    Debug.WriteLine("Error getting page " + i);
+                }
+            }
+                //});
+            
+
             return deckUrls;
         }
     }

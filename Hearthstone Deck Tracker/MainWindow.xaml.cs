@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using MahApps.Metro;
@@ -182,7 +183,8 @@ namespace Hearthstone_Deck_Tracker
             _overlay.Show();
 
             _playerWindow = new PlayerWindow(_config, _hearthstone.IsUsingPremade ? _hearthstone.PlayerDeck : _hearthstone.PlayerDrawn);
-            _opponentWindow = new OpponentWindow(_config, _hearthstone.EnemyCards);
+
+            _opponentWindow = new OpponentWindow(_config, _hearthstone.OpponentCardsWithGuesses);
             _timerWindow = new TimerWindow(_config);
 
             if (_config.WindowsOnStartup)
@@ -2145,6 +2147,24 @@ namespace Hearthstone_Deck_Tracker
                 UpdateNewDeckHeader(true);
                 UpdateDbListView();
             }
+        }
+
+        private async void Button_Click(object sender, RoutedEventArgs e)
+        {
+            var deckUrls = await _deckImporter.GetPopularDeckLists();
+            int count = 0;
+            Parallel.ForEach(deckUrls, url =>
+                {
+                    var deck = _deckImporter.Import(url).Result;
+                    if (deck != null)
+                    {
+                        _hearthstone.AddPopularDeck(deck);
+                    }
+                    Debug.WriteLine(count++ + " / " + deckUrls.Count);
+                });
+
+            _hearthstone.SavePopularDecks();
+
         }
 
     }

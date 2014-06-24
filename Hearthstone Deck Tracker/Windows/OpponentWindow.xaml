@@ -12,6 +12,7 @@
                     <Setter Property="Visibility" Value="Collapsed" />
                 </Style>
                 <Style TargetType="ListViewItem">
+                    <Setter Property="Opacity" Value="{Binding Opacity}" />
                     <Setter Property="Foreground" Value="{Binding ColorEnemy}" />
                     <Setter Property="Background" Value="{Binding Background}" />
                     <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
