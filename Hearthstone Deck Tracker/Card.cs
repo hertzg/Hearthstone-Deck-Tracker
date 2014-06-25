@@ -21,7 +21,7 @@ namespace Hearthstone_Deck_Tracker
         public int InHandCount;
 
         [XmlIgnore] 
-        public bool IsGuess;
+        public bool IsGuess { get; set; }
 
         [XmlIgnore]
         public bool NotInGuess;

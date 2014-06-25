@@ -94,5 +94,7 @@ namespace Hearthstone_Deck_Tracker
         public bool TextOnTopPlayer = false;
         public bool TextOnTopOpponent = false;
 
+        public bool OpponentDeckPrediction = true;
+
     }
 }

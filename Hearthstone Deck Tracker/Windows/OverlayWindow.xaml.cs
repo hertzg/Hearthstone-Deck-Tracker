@@ -38,7 +38,7 @@ namespace Hearthstone_Deck_Tracker
             _hearthstone = hearthstone;
 
             ListViewPlayer.ItemsSource = _hearthstone.IsUsingPremade ? _hearthstone.PlayerDeck : _hearthstone.PlayerDrawn;
-            ListViewOpponent.ItemsSource = _hearthstone.EnemyCards;
+            ListViewOpponent.ItemsSource = _config.OpponentDeckPrediction ? _hearthstone.OpponentCardsWithGuesses : _hearthstone.EnemyCards;
             Scaling = 1.0;
             OpponentScaling = 1.0;
             ShowInTaskbar = _config.ShowInTaskbar;
@@ -77,6 +77,7 @@ namespace Hearthstone_Deck_Tracker
         private void SortCardCollection(IEnumerable collection)
         {
             var view1 = (CollectionView)CollectionViewSource.GetDefaultView(collection);
+            view1.SortDescriptions.Add(new SortDescription("IsGuess", ListSortDirection.Ascending));
             view1.SortDescriptions.Add(new SortDescription("Cost", ListSortDirection.Ascending));
             view1.SortDescriptions.Add(new SortDescription("Type", ListSortDirection.Descending));
             view1.SortDescriptions.Add(new SortDescription("Name", ListSortDirection.Ascending));

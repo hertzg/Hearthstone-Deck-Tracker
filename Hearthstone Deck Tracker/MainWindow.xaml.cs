@@ -184,7 +184,7 @@ namespace Hearthstone_Deck_Tracker
 
             _playerWindow = new PlayerWindow(_config, _hearthstone.IsUsingPremade ? _hearthstone.PlayerDeck : _hearthstone.PlayerDrawn);
 
-            _opponentWindow = new OpponentWindow(_config, _hearthstone.OpponentCardsWithGuesses);
+            _opponentWindow = new OpponentWindow(_config, _config.OpponentDeckPrediction ? _hearthstone.OpponentCardsWithGuesses : _hearthstone.EnemyCards);
             _timerWindow = new TimerWindow(_config);
 
             if (_config.WindowsOnStartup)
