@@ -10,32 +10,32 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Hearthstone_Deck_Tracker.Hearthstone;
 
 namespace Hearthstone_Deck_Tracker
 {
     /// <summary>
-    /// Interaction logic for DeckNotes.xaml
+    /// Interaction logic for DeckSelectionDialog.xaml
     /// </summary>
-    public partial class DeckNotes : UserControl
+    public partial class GameResultDialog
     {
-        private Deck currentDeck;
-        public DeckNotes()
+        public bool Victory;
+        public GameResultDialog()
         {
             InitializeComponent();
+            WindowStartupLocation = WindowStartupLocation.CenterScreen;           
         }
 
-        public void SetDeck(Deck deck)
+        private void BtnYes_Click(object sender, RoutedEventArgs e)
         {
-            currentDeck = deck;
-            Textbox.Text = deck.Note;
+            Victory = true;
+            Close();
         }
 
-        private void Textbox_TextChanged(object sender, TextChangedEventArgs e)
+        private void BtnNo_Click(object sender, RoutedEventArgs e)
         {
-            currentDeck.Note = Textbox.Text;
+            Close();
         }
     }
 }

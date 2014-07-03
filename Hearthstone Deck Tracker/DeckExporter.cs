@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Hearthstone_Deck_Tracker.Hearthstone;
 
 #endregion
 

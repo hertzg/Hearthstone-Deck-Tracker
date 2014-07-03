@@ -11,6 +11,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Interop;
 using System.Windows.Media;
+using Hearthstone_Deck_Tracker.Hearthstone;
 
 #endregion
 
@@ -27,22 +28,22 @@ namespace Hearthstone_Deck_Tracker
         private readonly Config _config;
         private readonly int _customHeight;
         private readonly int _customWidth;
-        private readonly Hearthstone _hearthstone;
+        private readonly Game _game;
         private readonly int _offsetX;
         private readonly int _offsetY;
         private int _cardCount;
         private int _opponentCardCount;
 
-        public OverlayWindow(Config config, Hearthstone hearthstone)
+        public OverlayWindow(Config config, Game game)
         {
             InitializeComponent();
             _config = config;
-            _hearthstone = hearthstone;
+            _game = game;
 
-            ListViewPlayer.ItemsSource = _hearthstone.IsUsingPremade
-                                             ? _hearthstone.PlayerDeck
-                                             : _hearthstone.PlayerDrawn;
-            ListViewOpponent.ItemsSource = _hearthstone.EnemyCards;
+            ListViewPlayer.ItemsSource = _game.IsUsingPremade
+                                             ? _game.PlayerDeck
+                                             : _game.PlayerDrawn;
+            ListViewOpponent.ItemsSource = _game.EnemyCards;
             Scaling = 1.0;
             OpponentScaling = 1.0;
             ShowInTaskbar = _config.ShowInTaskbar;
@@ -130,7 +131,7 @@ namespace Hearthstone_Deck_Tracker
 
             if (cardsLeftInDeck <= 0) return;
 
-            var handWithoutCoin = cardCount - (_hearthstone.OpponentHasCoin ? 1 : 0);
+            var handWithoutCoin = cardCount - (_game.OpponentHasCoin ? 1 : 0);
             
 
             var holdingNextTurn2 =
@@ -265,7 +266,7 @@ namespace Hearthstone_Deck_Tracker
             }
 
 
-            var handCount = _hearthstone.EnemyHandCount;
+            var handCount = _game.EnemyHandCount;
             if (handCount < 0) handCount = 0;
             if (handCount > 10) handCount = 10;
             //offset label-grid based on handcount
@@ -305,7 +306,7 @@ namespace Hearthstone_Deck_Tracker
 
                 if (!_config.HideOpponentCardAge)
                 {
-                    _cardLabels[i].Text = _hearthstone.OpponentHandAge[i].ToString();
+                    _cardLabels[i].Text = _game.OpponentHandAge[i].ToString();
                     _cardLabels[i].Visibility = Visibility.Visible;
                 }
                 else
@@ -315,7 +316,7 @@ namespace Hearthstone_Deck_Tracker
 
                 if (!_config.HideOpponentCardMarks)
                 {
-                    _cardMarkLabels[i].Text = ((char)_hearthstone.OpponentHandMarks[i]).ToString();
+                    _cardMarkLabels[i].Text = ((char)_game.OpponentHandMarks[i]).ToString();
                     _cardMarkLabels[i].Visibility = Visibility.Visible;
                 }
                 else
@@ -354,17 +355,17 @@ namespace Hearthstone_Deck_Tracker
             ListViewOpponent.Visibility = _config.HideEnemyCards ? Visibility.Collapsed : Visibility.Visible;
             ListViewPlayer.Visibility = _config.HidePlayerCards ? Visibility.Collapsed : Visibility.Visible;
 
-            LblGrid.Visibility = _hearthstone.IsInMenu ? Visibility.Hidden : Visibility.Visible;
+            LblGrid.Visibility = _game.IsInMenu ? Visibility.Hidden : Visibility.Visible;
 
             DebugViewer.Visibility = _config.Debug ? Visibility.Visible : Visibility.Hidden;
             DebugViewer.Width = (Width*_config.TimerLeft/100);
 
-            SetCardCount(_hearthstone.PlayerHandCount,
-                         _hearthstone.IsUsingPremade
-                             ? _hearthstone.PlayerDeck.Sum(c => c.Count)
-                             : 30 - _hearthstone.PlayerDrawn.Sum(c => c.Count));
+            SetCardCount(_game.PlayerHandCount,
+                         _game.IsUsingPremade
+                             ? _game.PlayerDeck.Sum(c => c.Count)
+                             : 30 - _game.PlayerDrawn.Sum(c => c.Count));
 
-            SetEnemyCardCount(_hearthstone.EnemyHandCount, _hearthstone.OpponentDeckCount);
+            SetEnemyCardCount(_game.EnemyHandCount, _game.OpponentDeckCount);
 
             ReSizePosLists();
         }
@@ -375,7 +376,7 @@ namespace Hearthstone_Deck_Tracker
             //hide the overlay depenting on options
             ShowOverlay(!(
                              (_config.HideInBackground && !User32.IsForegroundWindow("Hearthstone"))
-                             || (_config.HideInMenu && _hearthstone.IsInMenu)
+                             || (_config.HideInMenu && _game.IsInMenu)
                              || _config.HideOverlay));
 
             var hsRect = new User32.Rect();

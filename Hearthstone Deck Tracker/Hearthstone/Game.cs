@@ -11,9 +11,9 @@ using Newtonsoft.Json.Linq;
 
 #endregion
 
-namespace Hearthstone_Deck_Tracker
+namespace Hearthstone_Deck_Tracker.Hearthstone
 {
-    public class Hearthstone
+    public class Game
     {
         public enum CardMark
         {
@@ -57,6 +57,7 @@ namespace Hearthstone_Deck_Tracker
         public int EnemyHandCount;
         public bool IsInMenu;
         public bool IsUsingPremade;
+        public bool IsRunning;
         public int OpponentDeckCount;
         public bool OpponentHasCoin;
         public ObservableCollection<Card> PlayerDeck;
@@ -65,8 +66,9 @@ namespace Hearthstone_Deck_Tracker
         public string PlayingAgainst;
         public string PlayingAs;
 
-        public Hearthstone(string languageTag)
+        public Game(string languageTag)
         {
+            IsRunning = false;
             IsInMenu = true;
             PlayerDeck = new ObservableCollection<Card>();
             PlayerDrawn = new ObservableCollection<Card>();
@@ -85,6 +87,7 @@ namespace Hearthstone_Deck_Tracker
 
         public int[] OpponentHandAge { get; private set; }
         public CardMark[] OpponentHandMarks { get; private set; }
+
 
         private void LoadCardDb(string languageTag)
         {

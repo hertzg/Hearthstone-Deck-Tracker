@@ -4,8 +4,9 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Media;
 using System.Xml.Serialization;
+using Hearthstone_Deck_Tracker.Stats;
 
-namespace Hearthstone_Deck_Tracker
+namespace Hearthstone_Deck_Tracker.Hearthstone
 {
     public class Deck : ICloneable
     {
@@ -17,6 +18,11 @@ namespace Hearthstone_Deck_Tracker
         [XmlArray(ElementName = "Tags")]
         [XmlArrayItem(ElementName = "Tag")]
         public List<string> Tags;
+
+       // public int DeckStatsId;
+
+        [XmlIgnore] 
+        public DeckStats Stats;
 
         [XmlIgnore]
         public string GetClass
@@ -88,13 +94,15 @@ namespace Hearthstone_Deck_Tracker
         {
             Cards = new ObservableCollection<Card>();
             Tags = new List<string>();
+            Stats = new DeckStats();
         }
 
-        public Deck(string name, string className, IEnumerable<Card> cards, IEnumerable<string> tags, string note, string url)
+        public Deck(string name, string className, IEnumerable<Card> cards, IEnumerable<string> tags, string note, DeckStats stats, string url)
         {
             Name = name;
             Class = className;
             Cards = new ObservableCollection<Card>();
+            Stats = new DeckStats();
             foreach (var card in cards)
             {
                 Cards.Add((Card)card.Clone());
@@ -102,6 +110,7 @@ namespace Hearthstone_Deck_Tracker
             Tags = new List<string>(tags);
             Note = note;
             Url = url;
+            Stats = stats;
         }
 
         public override string ToString()
@@ -111,7 +120,7 @@ namespace Hearthstone_Deck_Tracker
 
         public object Clone()
         {
-            return new Deck(Name, Class, Cards, Tags, Note, Url);
+            return new Deck(Name, Class, Cards, Tags, Note, Url, Stats);
         }
 
         public override bool Equals(object obj)

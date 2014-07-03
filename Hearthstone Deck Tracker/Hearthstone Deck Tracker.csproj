@@ -93,7 +93,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Card.cs" />
+    <Compile Include="Stats\DeckIteration.cs" />
+    <Compile Include="Stats\DeckStats.cs" />
+    <Compile Include="Hearthstone\Card.cs" />
+    <Compile Include="Stats\CardStats.cs" />
     <Compile Include="Controls\DeckListView.xaml.cs">
       <DependentUpon>DeckListView.xaml</DependentUpon>
     </Compile>
@@ -110,18 +113,22 @@
     <Compile Include="Controls\TagControl.xaml.cs">
       <DependentUpon>TagControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Deck.cs" />
+    <Compile Include="Hearthstone\Deck.cs" />
     <Compile Include="DeckExporter.cs" />
     <Compile Include="DeckImporter.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Decks.cs" />
-    <Compile Include="Hearthstone.cs" />
+    <Compile Include="Hearthstone\Decks.cs" />
+    <Compile Include="Hearthstone\Game.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="HsLogReader.cs" />
+    <Compile Include="Stats\GameStats.cs" />
     <Compile Include="TurnTimer.cs" />
+    <Compile Include="Windows\GameResultDialog.xaml.cs">
+      <DependentUpon>GameResultDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\DeckSelectionDialog.xaml.cs">
       <DependentUpon>DeckSelectionDialog.xaml</DependentUpon>
     </Compile>
@@ -166,6 +173,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Config.cs" />
+    <Page Include="Windows\GameResultDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Windows\DeckSelectionDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
