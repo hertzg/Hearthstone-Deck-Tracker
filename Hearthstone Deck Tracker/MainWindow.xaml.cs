@@ -1732,8 +1732,15 @@ namespace Hearthstone_Deck_Tracker
             {
                 TagControlFilter.AddSelectedTag(tag);
             }
-            newDeckClone.Stats.NewDeckIteration(newDeckClone);
 
+            //only create new iteration of any cards changed
+            if(!newDeckClone.Stats.Iterations.Last().Cards.All(c => newDeckClone.Cards.Contains(c)) ||
+                !newDeckClone.Cards.All(c => newDeckClone.Stats.Iterations.Last().Cards.Contains(c)))
+                newDeckClone.Stats.NewDeckIteration(newDeckClone);
+
+            newDeckClone.Stats.DeckName = newDeckClone.Name;
+            WriteDeckStats();
+            
             DeckPickerList.UpdateList();
             DeckPickerList.SelectDeck(newDeckClone);
 
