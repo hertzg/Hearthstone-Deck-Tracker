@@ -18,6 +18,8 @@ namespace Hearthstone_Deck_Tracker.Stats
 
         public Result GameResult;
         public string OpponentClass;
+        public bool First;
+        public int Turns;
 
         [XmlArray(ElementName = "Cards")]
         [XmlArrayItem(ElementName = "Card")]
@@ -27,6 +29,8 @@ namespace Hearthstone_Deck_Tracker.Stats
         {
             CardStats = new List<CardStats>();
             GameResult = Result.None;
+            First = false;
+            Turns = 0;
         }
     }
 }

@@ -380,6 +380,9 @@ namespace Hearthstone_Deck_Tracker
             {
                 _logReader.Start();
             }
+
+            DeckStatsWindow statsWindow = new DeckStatsWindow((Deck)lastDeck.Clone());
+            statsWindow.Show();
         }
 
         private void WriteConfig()
@@ -427,6 +430,11 @@ namespace Hearthstone_Deck_Tracker
             //maybe add timer to player/opponent windows
             _turnTimer.SetCurrentPlayer(args.Turn);
             _turnTimer.Restart();
+
+            if (_game.IsUsingPremade && _game.IsRunning)
+            {
+                _currentDeckStats.SetTurn(sender.GetTurnNumber());
+            }
         }
 
         private void LogReaderOnAnalyzing(HsLogReader sender, AnalyzingArgs args)
@@ -515,39 +523,19 @@ namespace Hearthstone_Deck_Tracker
             switch (args.MovementType)
             {
                 case CardMovementType.PlayerGet:
-                    HandlePlayerGet(args.CardId);
-                    if (_game.IsUsingPremade && _game.IsRunning)
-                    {
-                        DeckPickerList.SelectedDeck.Stats.CardDrawn(args.CardId);
-                        _xmlManagerDeckStats.Save("DeckStats.xml", DeckStats);
-                    }
+                    HandlePlayerGet(args.CardId, sender.GetTurnNumber());
                     break;
                 case CardMovementType.PlayerDraw:
-                    HandlePlayerDraw(args.CardId);
-                    if (_game.IsUsingPremade && _game.IsRunning)
-                    {
-                        DeckPickerList.SelectedDeck.Stats.CardDrawn(args.CardId);
-                        _xmlManagerDeckStats.Save("DeckStats.xml", DeckStats);
-                    }
+                    HandlePlayerDraw(args.CardId, sender.GetTurnNumber());
                     break;
                 case CardMovementType.PlayerMulligan:
                     HandlePlayerMulligan(args.CardId);
-                    if (_game.IsUsingPremade && _game.IsRunning)
-                    {
-                        DeckPickerList.SelectedDeck.Stats.CardMulliganed(args.CardId);
-                        _xmlManagerDeckStats.Save("DeckStats.xml", DeckStats);
-                    }
                     break;
                 case CardMovementType.PlayerHandDiscard:
                     HandlePlayerHandDiscard(args.CardId);
                     break;
                 case CardMovementType.PlayerPlay:
-                    HandlePlayerPlay(args.CardId);
-                    if (_game.IsUsingPremade && _game.IsRunning)
-                    {
-                        DeckPickerList.SelectedDeck.Stats.CardPlayed(args.CardId);
-                        _xmlManagerDeckStats.Save("DeckStats.xml", DeckStats);
-                    }
+                    HandlePlayerPlay(args.CardId, sender.GetTurnNumber());
                     break;
                 case CardMovementType.PlayerDeckDiscard:
                     HandlePlayerDeckDiscard(args.CardId);
@@ -655,12 +643,21 @@ namespace Hearthstone_Deck_Tracker
             _game.OpponentBackToHand(cardId, turn);
         }
 
-        private void HandlePlayerGet(string cardId)
+        private void HandlePlayerGet(string cardId, int turn)
         {
             _game.PlayerGet(cardId);
+
+            if (_game.IsUsingPremade && _game.IsRunning)
+            {
+                if (cardId == "GAME_005" && turn == 0)
+                {
+                    DeckPickerList.SelectedDeck.Stats.GoingFirst();
+                    _xmlManagerDeckStats.Save("DeckStats.xml", DeckStats);
+                }
+            }
         }
 
-        private void HandlePlayerDraw(string cardId)
+        private void HandlePlayerDraw(string cardId, int turn)
         {
            var correctDeck = _game.PlayerDraw(cardId);
 
@@ -668,6 +665,12 @@ namespace Hearthstone_Deck_Tracker
             {
                 _showIncorrectDeckMessage = true;
                 Logger.WriteLine("Found incorrect deck", "HandlePlayerDraw");
+            }
+
+            if (_game.IsUsingPremade && _game.IsRunning)
+            {
+                DeckPickerList.SelectedDeck.Stats.CardDrawn(cardId, turn);
+                _xmlManagerDeckStats.Save("DeckStats.xml", DeckStats);
             }
         }
 
@@ -677,6 +680,12 @@ namespace Hearthstone_Deck_Tracker
             Logger.WriteLine("HandlePlayerMulligan");
             _turnTimer.MulliganDone(Turn.Player);
             _game.Mulligan(cardId);
+
+            if (_game.IsUsingPremade && _game.IsRunning)
+            {
+                DeckPickerList.SelectedDeck.Stats.CardMulliganed(cardId);
+                _xmlManagerDeckStats.Save("DeckStats.xml", DeckStats);
+            }
         }
 
         private void HandlePlayerHandDiscard(string cardId)
@@ -684,9 +693,14 @@ namespace Hearthstone_Deck_Tracker
             _game.PlayerHandDiscard(cardId);
         }
 
-        private void HandlePlayerPlay(string cardId)
+        private void HandlePlayerPlay(string cardId, int turn)
         {
             _game.PlayerPlayed(cardId);
+            if (_game.IsUsingPremade && _game.IsRunning)
+            {
+                DeckPickerList.SelectedDeck.Stats.CardPlayed(cardId, turn);
+                _xmlManagerDeckStats.Save("DeckStats.xml", DeckStats);
+            }
         }
 
         private void HandlePlayerDeckDiscard(string cardId)
@@ -1345,7 +1359,6 @@ namespace Hearthstone_Deck_Tracker
 
                 if (!_game.IsInMenu && _currentDeckStats != null)
                 {
-                    //todo: no idea if this works.
                     var stats = _currentDeckStats.GetGameStats();
                     _currentDeckStats.ClearGameStats();
                     _currentDeckStats = deck.Stats;

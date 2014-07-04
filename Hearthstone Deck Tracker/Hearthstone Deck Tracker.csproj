@@ -93,6 +93,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Stats\CardStatsObject.cs" />
     <Compile Include="Stats\DeckIteration.cs" />
     <Compile Include="Stats\DeckStats.cs" />
     <Compile Include="Hearthstone\Card.cs" />
@@ -126,6 +127,9 @@
     <Compile Include="HsLogReader.cs" />
     <Compile Include="Stats\GameStats.cs" />
     <Compile Include="TurnTimer.cs" />
+    <Compile Include="Windows\DeckStatsWindow.xaml.cs">
+      <DependentUpon>DeckStatsWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\GameResultDialog.xaml.cs">
       <DependentUpon>GameResultDialog.xaml</DependentUpon>
     </Compile>
@@ -173,6 +177,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Config.cs" />
+    <Page Include="Windows\DeckStatsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Windows\GameResultDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

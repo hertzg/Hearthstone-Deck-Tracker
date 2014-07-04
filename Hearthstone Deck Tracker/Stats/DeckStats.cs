@@ -28,16 +28,16 @@ namespace Hearthstone_Deck_Tracker.Stats
             DeckName = deck.Name;
         }
 
-        public void CardDrawn(string cardId)
+        public void CardDrawn(string cardId, int turn)
         {
             Debug.WriteLine("Draw " + cardId + "(" + DeckName + ")", "DeckStats");
-            Iterations.Last().CardDrawn(cardId);
+            Iterations.Last().CardDrawn(cardId, turn);
         }
 
-        public void CardPlayed(string cardId)
+        public void CardPlayed(string cardId, int turn)
         {
             Debug.WriteLine("Played " + cardId + "(" + DeckName + ")", "DeckStats");
-            Iterations.Last().CardPlayed(cardId);
+            Iterations.Last().CardPlayed(cardId, turn);
         }
 
         public void NewGame(string opponentClass)
@@ -87,6 +87,16 @@ namespace Hearthstone_Deck_Tracker.Stats
         public void SetGameStats(GameStats stats)
         {
             Iterations.Last().SetGameStats(stats);
+        }
+
+        public void GoingFirst()
+        {
+            Iterations.Last().GoingFirst();
+        }
+
+        public void SetTurn(int turn)
+        {
+            Iterations.Last().SetTurn(turn);
         }
     }
     

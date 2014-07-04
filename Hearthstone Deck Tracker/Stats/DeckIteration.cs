@@ -30,7 +30,7 @@ namespace Hearthstone_Deck_Tracker.Stats
             Cards = ((Deck)deck.Clone()).Cards.ToList();
         }
 
-        public void CardDrawn(string cardId)
+        public void CardDrawn(string cardId, int turn)
         {
             var cardStats = _currentGame.CardStats.FirstOrDefault(c => c.CardId.Equals(cardId));
             if (cardStats == null)
@@ -38,10 +38,10 @@ namespace Hearthstone_Deck_Tracker.Stats
                 cardStats = new CardStats(cardId);
                 _currentGame.CardStats.Add(cardStats);
             }
-            cardStats.Drawn++;
+            cardStats.Drawn(turn);
         }
 
-        public void CardPlayed(string cardId)
+        public void CardPlayed(string cardId, int turn)
         {
             var cardStats = _currentGame.CardStats.FirstOrDefault(c => c.CardId.Equals(cardId));
             if (cardStats == null)
@@ -49,7 +49,7 @@ namespace Hearthstone_Deck_Tracker.Stats
                 cardStats = new CardStats(cardId);
                 _currentGame.CardStats.Add(cardStats);
             }
-            cardStats.Played++;
+            cardStats.Played(turn);
         }
 
         public void NewGame(string opponentClass)
@@ -73,8 +73,7 @@ namespace Hearthstone_Deck_Tracker.Stats
                 cardStats = new CardStats(cardId);
                 _currentGame.CardStats.Add(cardStats);
             }
-            cardStats.Mulliganed++;
-            cardStats.Drawn--;
+            cardStats.Mulliganed();
         }
 
         public void GameResult(GameStats.Result result)
@@ -103,6 +102,19 @@ namespace Hearthstone_Deck_Tracker.Stats
         public GameStats GetGameStats()
         {
             return _currentGame;
+        }
+
+        public void GoingFirst()
+        {
+            _currentGame.First = true;
+        }
+
+        public void SetTurn(int turn)
+        {
+            if (_currentGame != null)
+            {
+                _currentGame.Turns = turn;
+            }
         }
     }
 }
