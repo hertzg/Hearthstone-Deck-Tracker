@@ -40,10 +40,10 @@ namespace Hearthstone_Deck_Tracker.Stats
             Iterations.Last().CardPlayed(cardId, turn);
         }
 
-        public void NewGame()
+        public void NewGame(string opponentHero)
         {
             Debug.WriteLine("Started recording new game (" + DeckName + ")", "DeckStats");
-            Iterations.Last().NewGame();
+            Iterations.Last().NewGame(opponentHero);
         }
 
         public void GameEnd()
@@ -97,11 +97,6 @@ namespace Hearthstone_Deck_Tracker.Stats
         public void SetTurn(int turn)
         {
             Iterations.Last().SetTurn(turn);
-        }
-
-        public void SetOpponent(string opponentHero)
-        {
-            Iterations.Last().SetOpponent(opponentHero);
         }
     }
     

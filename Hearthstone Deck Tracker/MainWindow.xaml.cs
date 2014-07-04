@@ -62,6 +62,7 @@ namespace Hearthstone_Deck_Tracker
             @"\Blizzard\Hearthstone\log.config";
 
         private readonly string _decksPath;
+        private readonly string _deckStatsPath;
         private DeckStatsWindow _deckStatsWindow;
 
         private readonly HsLogReader _logReader;
@@ -212,6 +213,7 @@ namespace Hearthstone_Deck_Tracker
             _game.Reset();
 
             _decksPath = _config.HomeDir + @"\PlayerDecks.xml";
+            _deckStatsPath = _config.HomeDir + @"\DeckStats.xml";
 
             if (File.Exists("PlayerDecks.xml") && !File.Exists(_decksPath)) // migrate decks to home dir
                 File.Move("PlayerDecks.xml", _decksPath);
@@ -258,13 +260,13 @@ namespace Hearthstone_Deck_Tracker
             DeckStats = new List<DeckStats>();
 
 
-            if (!File.Exists("DeckStats.xml"))
+            if (!File.Exists(_deckStatsPath))
             {
-                _xmlManagerDeckStats.Save("DeckStats.xml", DeckStats);
+                WriteDeckStats();
             }
             else
             {
-                DeckStats = _xmlManagerDeckStats.Load("DeckStats.xml");
+                DeckStats = _xmlManagerDeckStats.Load(_deckStatsPath);
             }
 
 
@@ -279,7 +281,7 @@ namespace Hearthstone_Deck_Tracker
                 deck.Stats = stats;
             }
 
-            _xmlManagerDeckStats.Save("DeckStats.xml", DeckStats);
+            WriteDeckStats();
 
             _notifyIcon = new System.Windows.Forms.NotifyIcon();
             _notifyIcon.Icon = new Icon(@"Images/HearthstoneDeckTracker.ico");
@@ -393,6 +395,11 @@ namespace Hearthstone_Deck_Tracker
             _xmlManager.Save(_decksPath, _deckList);
         }
 
+        private void WriteDeckStats()
+        {
+            _xmlManagerDeckStats.Save(_deckStatsPath, DeckStats);
+        }
+
         #region LogReader Events
 
         private void TurnTimerOnTimerTick(TurnTimer sender, TimerEventArgs timerEventArgs)
@@ -477,7 +484,6 @@ namespace Hearthstone_Deck_Tracker
             if (!string.IsNullOrEmpty(args.OpponentHero))
             {
                 _game.PlayingAgainst = args.OpponentHero;
-                _currentDeckStats.SetOpponent(args.OpponentHero);
             }
             if (args.Victory != null)
             {
@@ -492,9 +498,8 @@ namespace Hearthstone_Deck_Tracker
                         HandleGameStart();
                         if (_game.IsUsingPremade && _game.IsRunning)
                         {
-                            DeckPickerList.SelectedDeck.Stats.NewGame();
+                            DeckPickerList.SelectedDeck.Stats.NewGame(_game.PlayingAgainst);
                             _currentDeckStats = DeckPickerList.SelectedDeck.Stats;
-                            _xmlManagerDeckStats.Save("DeckStats.xml", DeckStats);
                         }
                         break;
                     case GameState.GameEnd:
@@ -503,13 +508,13 @@ namespace Hearthstone_Deck_Tracker
                             if (DeckPickerList.SelectedDeck.Stats.GetGameResult() == GameStats.Result.None)
                             {
                                 var resultDialog = new GameResultDialog();
-                                resultDialog.Show();
+                                resultDialog.ShowDialog();
                                 DeckPickerList.SelectedDeck.Stats.SetGameResult(resultDialog.Victory
                                                                                     ? GameStats.Result.Victory
                                                                                     : GameStats.Result.Loss);
                             }
                             DeckPickerList.SelectedDeck.Stats.GameEnd();
-                            _xmlManagerDeckStats.Save("DeckStats.xml", DeckStats);
+                            WriteDeckStats();
                         }
                         HandleGameEnd();
                         break;
@@ -651,7 +656,6 @@ namespace Hearthstone_Deck_Tracker
                 if (cardId == "GAME_005" && turn == 0)
                 {
                     DeckPickerList.SelectedDeck.Stats.GoingFirst();
-                    _xmlManagerDeckStats.Save("DeckStats.xml", DeckStats);
                 }
             }
         }
@@ -669,7 +673,6 @@ namespace Hearthstone_Deck_Tracker
             if (_game.IsUsingPremade && _game.IsRunning)
             {
                 DeckPickerList.SelectedDeck.Stats.CardDrawn(cardId, turn);
-                _xmlManagerDeckStats.Save("DeckStats.xml", DeckStats);
             }
         }
 
@@ -683,7 +686,6 @@ namespace Hearthstone_Deck_Tracker
             if (_game.IsUsingPremade && _game.IsRunning)
             {
                 DeckPickerList.SelectedDeck.Stats.CardMulliganed(cardId);
-                _xmlManagerDeckStats.Save("DeckStats.xml", DeckStats);
             }
         }
 
@@ -698,7 +700,6 @@ namespace Hearthstone_Deck_Tracker
             if (_game.IsUsingPremade && _game.IsRunning)
             {
                 DeckPickerList.SelectedDeck.Stats.CardPlayed(cardId, turn);
-                _xmlManagerDeckStats.Save("DeckStats.xml", DeckStats);
             }
         }
 
@@ -1732,7 +1733,6 @@ namespace Hearthstone_Deck_Tracker
                 TagControlFilter.AddSelectedTag(tag);
             }
             newDeckClone.Stats.NewDeckIteration(newDeckClone);
-            _xmlManagerDeckStats.Save("DeckStats.xml", DeckStats);
 
             DeckPickerList.UpdateList();
             DeckPickerList.SelectDeck(newDeckClone);
