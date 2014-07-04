@@ -52,10 +52,9 @@ namespace Hearthstone_Deck_Tracker.Stats
             cardStats.Played(turn);
         }
 
-        public void NewGame(string opponentClass)
+        public void NewGame()
         {
             _currentGame = new GameStats();
-            _currentGame.OpponentClass = opponentClass;
         }
         public void GameEnd()
         {
@@ -115,6 +114,11 @@ namespace Hearthstone_Deck_Tracker.Stats
             {
                 _currentGame.Turns = turn;
             }
+        }
+
+        public void SetOpponent(string opponentHero)
+        {
+            _currentGame.OpponentClass = opponentHero;
         }
     }
 }

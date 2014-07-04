@@ -67,8 +67,9 @@
                             <RowDefinition Height="*"></RowDefinition>
                         </Grid.RowDefinitions>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0" Grid.Row="0">
-                            <Button x:Name="ButtonNoDeck" Content="Use no Deck" Width="117" Margin="0,0,3,0" Height="26" Click="ButtonNoDeck_Click" />
-                            <Button x:Name="BtnFilterTag" Content="Filter by Tag"  Width="117" Margin="3,0,0,0" Height="26" Click="BtnFilterTag_Click" />
+                            <Button x:Name="ButtonNoDeck" Content="Use no Deck" Width="76" Margin="0,0,3,0" Height="26" Click="ButtonNoDeck_Click" />
+                            <Button x:Name="BtnFilterTag" Content="Filter Tag"  Width="76" Margin="3,0,3,0" Height="26" Click="BtnFilterTag_Click" />
+                            <Button x:Name="BtnShowStats" Content="Show Stats"  Width="76" Margin="3,0,0,0" Height="26" Click="BtnShowStats_Click" />
                         </StackPanel>
                         <local:DeckPicker x:Name="DeckPickerList" HorizontalAlignment="Center" Margin="0,6,0,6" Height="auto" Width="240" Grid.Row="1" Background="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}"/>
                     </Grid>

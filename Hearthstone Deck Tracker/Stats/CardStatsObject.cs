@@ -136,7 +136,7 @@ namespace Hearthstone_Deck_Tracker.Stats
                         break;
                 }
             }
-            return Math.Round(wins / gameCount, 2) + " / " + Math.Round(losses / gameCount, 2);
+            return (gameCount != 0 ? Math.Round(wins / gameCount, 2) : 0 )+ " / " + (gameCount != 0 ? Math.Round(losses / gameCount, 2) : 0);
         }
 
         public string[] Plays

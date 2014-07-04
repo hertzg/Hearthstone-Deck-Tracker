@@ -62,6 +62,7 @@ namespace Hearthstone_Deck_Tracker
             @"\Blizzard\Hearthstone\log.config";
 
         private readonly string _decksPath;
+        private DeckStatsWindow _deckStatsWindow;
 
         private readonly HsLogReader _logReader;
         private readonly System.Windows.Forms.NotifyIcon _notifyIcon;
@@ -380,9 +381,6 @@ namespace Hearthstone_Deck_Tracker
             {
                 _logReader.Start();
             }
-
-            DeckStatsWindow statsWindow = new DeckStatsWindow((Deck)lastDeck.Clone());
-            statsWindow.Show();
         }
 
         private void WriteConfig()
@@ -479,6 +477,7 @@ namespace Hearthstone_Deck_Tracker
             if (!string.IsNullOrEmpty(args.OpponentHero))
             {
                 _game.PlayingAgainst = args.OpponentHero;
+                _currentDeckStats.SetOpponent(args.OpponentHero);
             }
             if (args.Victory != null)
             {
@@ -493,7 +492,7 @@ namespace Hearthstone_Deck_Tracker
                         HandleGameStart();
                         if (_game.IsUsingPremade && _game.IsRunning)
                         {
-                            DeckPickerList.SelectedDeck.Stats.NewGame(args.OpponentHero);
+                            DeckPickerList.SelectedDeck.Stats.NewGame();
                             _currentDeckStats = DeckPickerList.SelectedDeck.Stats;
                             _xmlManagerDeckStats.Save("DeckStats.xml", DeckStats);
                         }
@@ -1277,6 +1276,16 @@ namespace Hearthstone_Deck_Tracker
                     Process.Start(Path.GetDirectoryName(Application.ResourceAssembly.Location) + "/Screenshots");
                 }
             }
+        }
+
+        private void BtnShowStats_Click(object sender, RoutedEventArgs e)
+        {
+            if (_deckStatsWindow != null)
+            {
+                _deckStatsWindow.Close();
+            }
+            _deckStatsWindow = new DeckStatsWindow((Deck)DeckPickerList.SelectedDeck.Clone());
+            _deckStatsWindow.Show();
         }
         #endregion
 
@@ -2565,6 +2574,7 @@ namespace Hearthstone_Deck_Tracker
             SaveConfig(true);
         }
         #endregion
+
 
     }
 }
