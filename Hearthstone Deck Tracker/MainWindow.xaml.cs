@@ -1733,9 +1733,11 @@ namespace Hearthstone_Deck_Tracker
                 TagControlFilter.AddSelectedTag(tag);
             }
 
+
             //only create new iteration of any cards changed
-            if(!newDeckClone.Stats.Iterations.Last().Cards.All(c => newDeckClone.Cards.Contains(c)) ||
-                !newDeckClone.Cards.All(c => newDeckClone.Stats.Iterations.Last().Cards.Contains(c)))
+            var lastIterationCards = newDeckClone.Stats.Iterations.Last().Cards;
+            if (lastIterationCards.Any(c => newDeckClone.Cards.Any(c2 => c2.Equals(c) && c2.Count == c.Count)) ||
+                newDeckClone.Cards.Any(c => lastIterationCards.Any(c2 => c2.Equals(c) && c2.Count == c.Count)))
                 newDeckClone.Stats.NewDeckIteration(newDeckClone);
 
             newDeckClone.Stats.DeckName = newDeckClone.Name;
