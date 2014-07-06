@@ -18,8 +18,7 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
         [XmlArray(ElementName = "Tags")]
         [XmlArrayItem(ElementName = "Tag")]
         public List<string> Tags;
-
-       // public int DeckStatsId;
+        
 
         [XmlIgnore] 
         public DeckStats Stats;
@@ -40,6 +39,30 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
         public string TagList
         {
             get { return Tags.Count > 0 ? "[" + Tags.Aggregate((t, n) => t + ", " + n) + "]" : ""; }
+        }
+
+        [XmlIgnore]
+        public string WinLoss
+        {
+            get
+            {
+                var wins = 0;
+                var losses = 0;
+                foreach (var gs in Stats.Iterations.Last().GameStats)
+                {
+                    switch (gs.GameResult)
+                    {
+                        case GameStats.Result.Victory:
+                            wins++;
+                            break;
+                        case GameStats.Result.Loss:
+                            losses++;
+                            break;
+                    }
+                }
+                var winPercent = wins + losses > 0 ? Math.Round(100f*wins/(wins + losses), 2) : 0;
+                return string.Format("{0}-{1} ({2}%)" , wins, losses, winPercent);
+            }
         }
 
         [XmlIgnore]
@@ -120,7 +143,7 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
 
         public object Clone()
         {
-            return new Deck(Name, Class, Cards, Tags, Note, Url, Stats);
+            return new Deck(Name, Class, Cards, Tags, Note, Stats, Url);
         }
 
         public override bool Equals(object obj)

@@ -29,10 +29,12 @@ namespace Hearthstone_Deck_Tracker
 
             public string TagList
             {
-                get
-                {
-                    return "";
-                }
+                get { return ""; }
+            }
+
+            public string WinLoss
+            {
+                get { return ""; }
             }
 
             public string GetName
