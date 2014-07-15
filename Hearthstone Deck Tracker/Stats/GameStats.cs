@@ -15,13 +15,20 @@ namespace Hearthstone_Deck_Tracker.Stats
             Win,
             Loss
         };
-
-        public Result GameResult { get; set; }
-        public string Opponent;
-        public bool Coin { get; set; }
-        public int TotalTurns { get; set; }
+        
+        public bool Coin;
         public DateTime Start;
         public DateTime End;
+
+        public Result GameResult { get; set; }
+        public string Opponent { get; set; }
+        public int TotalTurns { get; set; }
+
+        [XmlIgnore]
+        public string GotCoin
+        {
+            get { return Coin ? "No" : "Yes"; }
+        }
 
         [XmlIgnore]
         public string Duration
@@ -38,6 +45,8 @@ namespace Hearthstone_Deck_Tracker.Stats
         {
             get { return Start.ToShortDateString() + " " + Start.ToShortTimeString(); }
         }
+
+
         
         [XmlArray(ElementName = "Turns")]
         [XmlArrayItem(ElementName = "Turn")]

@@ -141,5 +141,10 @@ namespace Hearthstone_Deck_Tracker
             }
             ListboxGameDetail.ItemsSource = strings;
         }
+
+        private void BtnEdit_Click(object sender, RoutedEventArgs e)
+        {
+            FlyoutEditGame.IsOpen = true;
+        }
     }
 }
