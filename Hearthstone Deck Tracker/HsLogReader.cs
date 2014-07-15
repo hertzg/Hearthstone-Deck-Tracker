@@ -358,13 +358,14 @@ namespace Hearthstone_Deck_Tracker
                             case "FRIENDLY DECK":
                                 if (to == "FRIENDLY HAND")
                                 {
-                                    //player draw
-                                    CardMovement(this, new CardMovementArgs(CardMovementType.PlayerDraw, id));
                                     if (_powerCount >= PowerCountTreshold)
                                     {
                                         TurnStart(this, new TurnStartArgs(Turn.Player));
                                         _turnCount++;
                                     }
+
+                                    //player draw
+                                    CardMovement(this, new CardMovementArgs(CardMovementType.PlayerDraw, id));
                                 }
                                 else
                                 {
