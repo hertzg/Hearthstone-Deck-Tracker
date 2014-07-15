@@ -7,53 +7,116 @@
 
                       Title="GameHistoryWindow" Height="554" Width="837" Closing="MetroWindow_Closing" BorderBrush="{DynamicResource AccentColorBrush}" BorderThickness="1">
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"></ColumnDefinition>
-            <ColumnDefinition Width="auto"></ColumnDefinition>
-        </Grid.ColumnDefinitions>
+        <TabControl>
+            <TabItem Header="Games">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"></RowDefinition>
+                        <RowDefinition Height="*"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="auto"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <controls:Flyout x:Name="FlyoutEditGame" Width="300" Height="auto" Header="Edit Game" Position="Right" Panel.ZIndex="1" Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="2">
+                        <Label Content="stuff to edit game here"/>
+                    </controls:Flyout>
 
-        <controls:Flyout x:Name="FlyoutEditGame" Width="300" Height="auto" Header="Edit Game" Position="Right" Panel.ZIndex="1" Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="2">
-            <Label Content="stuff to edit game here"/>
-        </controls:Flyout>
+                    <GroupBox Header="Overview" VerticalAlignment="Top" Height="116" Grid.Row="0" Grid.ColumnSpan="2" >
+                        <Grid>
+                            <DataGrid Name="DataGridWinLoss" AutoGenerateColumns="False" HorizontalAlignment="Left" VerticalAlignment="Top" Height="77" Width="auto" CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False" CanUserReorderColumns="False"  CanUserSortColumns="False">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Result" Binding="{Binding Result}"></DataGridTextColumn>
+                                    <DataGridTextColumn Header="Total" Binding="{Binding Total}"></DataGridTextColumn>
+                                    <DataGridTextColumn Header="With Coin" Binding="{Binding Coin}"></DataGridTextColumn>
+                                    <DataGridTextColumn Header="Without Coin" Binding="{Binding NoCoin}"></DataGridTextColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </GroupBox>
+                    <GroupBox Header="Games" Grid.Row="1">
+                        <Grid>
+                            <DataGrid CanUserAddRows="False" Name="DGrid" SelectionChanged="DGrid_SelectionChanged" Margin="0,0,0,40" AlternationCount="2" AutoGenerateColumns="False">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Result" Binding="{Binding GameResult}"></DataGridTextColumn>
+                                    <DataGridTextColumn Header="Opponent" Binding="{Binding Opponent}"></DataGridTextColumn>
+                                    <DataGridTextColumn Header="Turns" Binding="{Binding TotalTurns}"></DataGridTextColumn>
+                                    <DataGridTextColumn Header="Coin" Binding="{Binding GotCoin}"></DataGridTextColumn>
+                                    <DataGridTextColumn Header="Duration" Binding="{Binding Duration}"></DataGridTextColumn>
+                                    <DataGridTextColumn Header="Started" Binding="{Binding Started}"></DataGridTextColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                            <Button x:Name="BtnEdit" Content="Edit selected" HorizontalAlignment="Left" Margin="10,0,0,10" VerticalAlignment="Bottom" Width="117" Click="BtnEdit_Click"/>
+                            <Button Name="BtnDelete" Content="Delete selected" HorizontalAlignment="Left" Margin="132,0,0,10" VerticalAlignment="Bottom" Width="117" Click="BtnDelete_Click"/>
+
+                        </Grid>
+                    </GroupBox>
+                    <GroupBox Header="Game Details" HorizontalAlignment="Right" Grid.Row="1" Grid.Column="1" Width="360">
+                        <Grid>
+                            <ListBox Name="ListboxGameDetail" Margin="0,56,0,0" BorderThickness="1"/>
+                            <CheckBox Content="Plays" HorizontalAlignment="Left" Margin="91,10,0,0" VerticalAlignment="Top"/>
+                            <CheckBox Content="Plays" HorizontalAlignment="Left" Margin="91,33,0,0" VerticalAlignment="Top"/>
+                            <CheckBox Content="Draws" HorizontalAlignment="Left" Margin="152,10,0,0" VerticalAlignment="Top"/>
+                            <CheckBox Content="Draws" HorizontalAlignment="Left" Margin="152,33,0,0" VerticalAlignment="Top"/>
+                            <CheckBox Content="Mulligan" HorizontalAlignment="Left" Margin="213,10,0,0" VerticalAlignment="Top"/>
+                            <CheckBox Content="Mulligan" HorizontalAlignment="Left" Margin="213,33,0,0" VerticalAlignment="Top"/>
+                            <Label Content="Player:" HorizontalAlignment="Left" Margin="10,6,0,0" VerticalAlignment="Top"/>
+                            <Label Content="Opponent:" HorizontalAlignment="Left" Margin="10,29,0,0" VerticalAlignment="Top"/>
+                        </Grid>
+                    </GroupBox>
+
+                </Grid>
+                
+            </TabItem>
+            <TabItem Header="Deck Stats">
+                <Grid>
+                    <ListView Name="ListviewStats" Margin="0,45,0,0" AlternationCount="2">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="Card" Width="225">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Grid Background="{Binding CardBackground}" Height="35" Width="215">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="32"></ColumnDefinition>
+                                                    <ColumnDefinition Width="*"></ColumnDefinition>
+                                                </Grid.ColumnDefinitions>
+                                                <local:OutlinedTextBlock Width="32" Height="25" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding CardCost}" FontFamily="/Hearthstone Deck Tracker;component/Resources/#Belwe Bd BT" TextAlignment="Center" FontSize="20" Grid.Column="0"/>
+                                                <local:OutlinedTextBlock Height="16" VerticalAlignment="Center" Text="{Binding CardName}" FontFamily="/Hearthstone Deck Tracker;component/Resources/#Belwe Bd BT" TextAlignment="Left" FontSize="13" Grid.Column="1"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Total">
+                                </GridViewColumn>
+                                <GridViewColumn Header="Druid">
+                                </GridViewColumn>
+                                <GridViewColumn Header="Hunter">
+                                </GridViewColumn>
+                                <GridViewColumn Header="Mage">
+                                </GridViewColumn>
+                                <GridViewColumn Header="Paladin">
+                                </GridViewColumn>
+                                <GridViewColumn Header="Priest">
+                                </GridViewColumn>
+                                <GridViewColumn Header="Rogue">
+                                </GridViewColumn>
+                                <GridViewColumn Header="Shaman">
+                                </GridViewColumn>
+                                <GridViewColumn Header="Warlock">
+                                </GridViewColumn>
+                                <GridViewColumn Header="Warrior">
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                    <Label Content="Iteration" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
+                    <ComboBox Name="ComboboxDeckIteration" HorizontalAlignment="Left" Margin="70,10,0,0" VerticalAlignment="Top" Width="120"/>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
         
-        <GroupBox Header="Overview" VerticalAlignment="Top" Height="116" Grid.Row="0" Grid.ColumnSpan="2" >
-            <Grid>
-                <DataGrid Name="DataGridWinLoss" AutoGenerateColumns="False" HorizontalAlignment="Left" VerticalAlignment="Top" Height="77" Width="auto" CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False" CanUserReorderColumns="False"  CanUserSortColumns="False">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Result" Binding="{Binding Result}"></DataGridTextColumn>
-                        <DataGridTextColumn Header="Total" Binding="{Binding Total}"></DataGridTextColumn>
-                        <DataGridTextColumn Header="With Coin" Binding="{Binding Coin}"></DataGridTextColumn>
-                        <DataGridTextColumn Header="Without Coin" Binding="{Binding NoCoin}"></DataGridTextColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </Grid>
-        </GroupBox>
-        <GroupBox Header="Games" Grid.Row="1">
-            <Grid>
-                <DataGrid CanUserAddRows="False" Name="DGrid" SelectionChanged="DGrid_SelectionChanged" Margin="0,0,0,40" AlternationCount="2" AutoGenerateColumns="False">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Result" Binding="{Binding GameResult}"></DataGridTextColumn>
-                        <DataGridTextColumn Header="Opponent" Binding="{Binding Opponent}"></DataGridTextColumn>
-                        <DataGridTextColumn Header="Turns" Binding="{Binding TotalTurns}"></DataGridTextColumn>
-                        <DataGridTextColumn Header="Coin" Binding="{Binding GotCoin}"></DataGridTextColumn>
-                        <DataGridTextColumn Header="Duration" Binding="{Binding Duration}"></DataGridTextColumn>
-                        <DataGridTextColumn Header="Started" Binding="{Binding Started}"></DataGridTextColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
-                <Button x:Name="BtnEdit" Content="Edit selected" HorizontalAlignment="Left" Margin="10,0,0,10" VerticalAlignment="Bottom" Width="117" Click="BtnEdit_Click"/>
-                <Button Name="BtnDelete" Content="Delete selected" HorizontalAlignment="Left" Margin="132,0,0,10" VerticalAlignment="Bottom" Width="117" Click="BtnDelete_Click"/>
-
-            </Grid>
-        </GroupBox>
-        <GroupBox Header="Game Details" HorizontalAlignment="Right" Grid.Row="1" Grid.Column="1" Width="200">
-            <Grid>
-                <ListBox Name="ListboxGameDetail" HorizontalAlignment="Left"/>
-            </Grid>
-        </GroupBox>
 
     </Grid>
 </controls:MetroWindow>
