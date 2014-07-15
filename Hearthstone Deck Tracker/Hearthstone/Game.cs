@@ -56,6 +56,7 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
         public int OpponentHandCount;
         public bool IsInMenu;
         public bool IsUsingPremade;
+        public bool IsRunning;
         public int OpponentDeckCount;
         public bool OpponentHasCoin;
         public ObservableCollection<Card> PlayerDeck;
@@ -66,6 +67,7 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
 
         public Game(string languageTag)
         {
+            IsRunning = false;
             IsInMenu = true;
             PlayerDeck = new ObservableCollection<Card>();
             PlayerDrawn = new ObservableCollection<Card>();

@@ -1,0 +1,13 @@
+﻿<controls:MetroWindow x:Class="Hearthstone_Deck_Tracker.GameHistoryWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                                    xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+                                    Title="GameHistoryWindow" Height="554" Width="676" Closing="MetroWindow_Closing">
+    <Grid>
+        <DataGrid CanUserAddRows="False" Name="DGrid" Margin="0,121,279,40" SelectionChanged="DGrid_SelectionChanged"/>
+        <Button Name="BtnDelete" Content="Delete selected" HorizontalAlignment="Left" Margin="10,0,0,10" VerticalAlignment="Bottom" Width="117" Click="BtnDelete_Click"/>
+        <DataGrid Name="DataGridWinLoss" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="96" Width="300" AlternationCount="2"/>
+        <ListBox Name="ListboxGameDetail" HorizontalAlignment="Left" Height="362" Margin="394,121,0,0" VerticalAlignment="Top" Width="264"/>
+
+    </Grid>
+</controls:MetroWindow>

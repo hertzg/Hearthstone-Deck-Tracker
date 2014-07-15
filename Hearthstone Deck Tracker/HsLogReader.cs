@@ -80,6 +80,7 @@ namespace Hearthstone_Deck_Tracker
         public GameState? State { get; set; }
         public string PlayerHero { get; set; }
         public string OpponentHero { get; set; }
+        public bool? Victory;
     }
 
     public class AnalyzingArgs : EventArgs
@@ -335,6 +336,18 @@ namespace Hearthstone_Deck_Tracker
                                     GameStateChange(this,
                                                     new GameStateArgs { OpponentHero = _heroIdDict[id] });
                                 }
+                            }
+                            else
+                            {
+                                if (from.Contains("OPPOSING"))
+                                {
+                                    GameStateChange(this, new GameStateArgs { Victory = true });
+                                }
+                                else
+                                {
+                                    GameStateChange(this, new GameStateArgs { Victory = false });
+                                }
+
                             }
                             _powerCount = 0;
                             continue;

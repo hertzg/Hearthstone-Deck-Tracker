@@ -68,8 +68,12 @@
       <HintPath>..\packages\Newtonsoft.Json.6.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Data.Entity" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
     <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -93,6 +97,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Controls\DeckStatsToolTip.xaml.cs">
+      <DependentUpon>DeckStatsToolTip.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\ManaCostBarToolTip.xaml.cs">
       <DependentUpon>ManaCostBarToolTip.xaml</DependentUpon>
     </Compile>
@@ -139,9 +146,19 @@
     <Compile Include="Hearthstone\Game.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="HsLogReader.cs" />
+    <Compile Include="Stats\DeckIteration.cs" />
+    <Compile Include="Stats\DeckStats.cs" />
+    <Compile Include="Stats\GameStats.cs" />
+    <Compile Include="Stats\TurnStats.cs" />
     <Compile Include="TurnTimer.cs" />
     <Compile Include="Windows\DeckSelectionDialog.xaml.cs">
       <DependentUpon>DeckSelectionDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\GameHistoryWindow.xaml.cs">
+      <DependentUpon>GameHistoryWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Windows\GameResultDialog.xaml.cs">
+      <DependentUpon>GameResultDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Windows\OpponentWindow.xaml.cs">
       <DependentUpon>OpponentWindow.xaml</DependentUpon>
@@ -160,6 +177,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\DeckListView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\DeckStatsToolTip.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -209,6 +230,14 @@
     </Compile>
     <Compile Include="Config.cs" />
     <Page Include="Windows\DeckSelectionDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\GameHistoryWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\GameResultDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -1533,6 +1562,11 @@
       <Visible>False</Visible>
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.SQL.Server.Compact.4.0">
+      <Visible>False</Visible>
+      <ProductName>SQL Server Compact 4.0 SP1</ProductName>
+      <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup />
