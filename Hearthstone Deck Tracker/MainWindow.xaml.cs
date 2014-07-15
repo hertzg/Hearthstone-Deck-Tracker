@@ -624,6 +624,8 @@ namespace Hearthstone_Deck_Tracker
                         {
                             DeckPickerList.SelectedDeck.Stats.NewGame();
                             _currentDeckStats = DeckPickerList.SelectedDeck.Stats;
+                            if(!string.IsNullOrEmpty(_game.PlayingAgainst))
+                                _currentDeckStats.SetOpponentHero(_game.PlayingAgainst);
                         }
                         break;
                     case GameState.GameEnd:
