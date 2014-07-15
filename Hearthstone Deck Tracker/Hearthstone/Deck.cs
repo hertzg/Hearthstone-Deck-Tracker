@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Media;
 using System.Xml.Serialization;
+using Hearthstone_Deck_Tracker.Stats;
 
 namespace Hearthstone_Deck_Tracker.Hearthstone
 {
@@ -19,6 +20,10 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
         [XmlArrayItem(ElementName = "Tag")]
         public List<string> Tags;
 
+
+        [XmlIgnore]
+        public DeckStats Stats;
+
         [XmlIgnore]
         public string GetClass
         {
@@ -30,7 +35,7 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
         {
             get
             {
-                var charCount = IsSelectedInGui ? 20 : 25;
+                var charCount = IsSelectedInGui ? 15 : 20;
                 var tmpName = Name.Length > charCount ? string.Join("", Name.Take(charCount)) + "..." : Name;
                 return IsSelectedInGui ? string.Format("> {0} <", tmpName) : tmpName;
             }
@@ -46,6 +51,78 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
         {
             get { return Tags.Count > 0 ? "[" + Tags.Aggregate((t, n) => t + ", " + n) + "]" : ""; }
         }
+
+
+        [XmlIgnore]
+        public int WinsCurrent
+        {
+            get { return Stats.Iterations.Last().GameStats.Count(g => g.GameResult == GameStats.Result.Win); }
+        }
+
+        [XmlIgnore]
+        public int WinsTotal
+        {
+            get { return Stats.Iterations.Sum( i => i.GameStats.Count(g => g.GameResult == GameStats.Result.Win)); }
+        }
+
+        [XmlIgnore]
+        public string WinsPercentCurrent
+        {
+            get
+            {
+                var gameCount = Stats.Iterations.Last().GameStats.Count;
+                if (gameCount == 0) return "-%";
+
+                return Math.Round(Stats.Iterations.Last()
+                     .GameStats.Count(g => g.GameResult == GameStats.Result.Win) * 100.0 /
+                                  gameCount,
+                                  0) + "%";
+            }
+        }
+
+        [XmlIgnore]
+        public string WinsPercentTotal
+        {
+            get
+            {
+                var gameCount = Stats.Iterations.Sum(i => i.GameStats.Count);
+                if (gameCount == 0) return "(-%)";
+
+                return "(" + 
+                    Math.Round(
+                        Stats.Iterations.Sum(
+                            i => i.GameStats.Count(g => g.GameResult == GameStats.Result.Win)) * 100.0 /
+                            gameCount, 0) + "%)";
+            }
+        }
+
+        [XmlIgnore]
+        public int LossesCurrent
+        {
+            get { return Stats.Iterations.Last().GameStats.Count(g => g.GameResult == GameStats.Result.Loss); }
+        }
+
+        [XmlIgnore]
+        public int LossesTotal
+        {
+            get { return Stats.Iterations.Sum(i => i.GameStats.Count(g => g.GameResult == GameStats.Result.Loss)); }
+        }
+
+        [XmlIgnore]
+        public Visibility ToolTipVisiblity
+        {
+            get { return Visibility.Visible; }
+        }
+
+        [XmlIgnore]
+        public string TotalGames
+        {
+            get
+            {
+                return Stats.Iterations.Last().GameStats.Count + " "; 
+            }
+        }
+        
 
         [XmlIgnore]
         public SolidColorBrush ClassColorBrush
@@ -102,11 +179,12 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
         {
             Cards = new ObservableCollection<Card>();
             Tags = new List<string>();
+            Stats = new DeckStats();
             Note = string.Empty;
             Url = string.Empty;
         }
 
-        public Deck(string name, string className, IEnumerable<Card> cards, IEnumerable<string> tags, string note, string url)
+        public Deck(string name, string className, IEnumerable<Card> cards, IEnumerable<string> tags, string note, string url, DeckStats stats)
         {
             Name = name;
             Class = className;
@@ -118,6 +196,7 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
             Tags = new List<string>(tags);
             Note = note;
             Url = url;
+            Stats = stats;
         }
 
         public override string ToString()
@@ -127,7 +206,7 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
 
         public object Clone()
         {
-            return new Deck(Name, Class, Cards, Tags, Note, Url);
+            return new Deck(Name, Class, Cards, Tags, Note, Url, Stats);
         }
 
         public override bool Equals(object obj)
