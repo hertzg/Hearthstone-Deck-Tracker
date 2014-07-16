@@ -19,13 +19,16 @@ namespace Hearthstone_Deck_Tracker.Stats
         public List<GameStats> GameStats;
         private GameStats _currentGame;
 
+        public int Id;
+
         public DeckIteration()
         {
             GameStats = new List<GameStats>();
         }
 
-        public DeckIteration(Deck deck)
+        public DeckIteration(Deck deck, int id)
         {
+            Id = id;
             GameStats = new List<GameStats>();
             Cards = ((Deck)deck.Clone()).Cards.ToList();
         }
@@ -99,5 +102,11 @@ namespace Hearthstone_Deck_Tracker.Stats
         {
             _currentGame.AddPlay(type, cardId);
         }
+
+        public override string ToString()
+        {
+            return "Iteration #" + Id + " (" + GameStats.Count + " games)";
+        }
+        
     }
 }

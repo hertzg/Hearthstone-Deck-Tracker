@@ -681,12 +681,6 @@ namespace Hearthstone_Deck_Tracker
                 case CardMovementType.OpponentSecretTrigger:
                     HandleOpponentSecretTrigger(args.CardId);
                     break;
-                case CardMovementType.OpponentPlay:
-                    //moved to CardPosChange
-                    break;
-                case CardMovementType.OpponentHandDiscard:
-                    //moved to CardPosChange (included in play)
-                    break;
                 case CardMovementType.OpponentDeckDiscard:
                     HandleOpponentDeckDiscard(args.CardId);
                     break;
@@ -2155,8 +2149,8 @@ namespace Hearthstone_Deck_Tracker
             {
                 TagControlNewDeck.SetSelectedTags(new List<string>());
                 var lastIterationCards = newDeckClone.Stats.Iterations.Last().Cards;
-                if (lastIterationCards.Any(c => newDeckClone.Cards.Any(c2 => c2.Equals(c) && c2.Count == c.Count)) ||
-                    newDeckClone.Cards.Any(c => lastIterationCards.Any(c2 => c2.Equals(c) && c2.Count == c.Count)))
+                if (lastIterationCards.Any(c => newDeckClone.Cards.Any(c2 => c2.Equals(c) && c2.Count != c.Count ) || !newDeckClone.Cards.Any(c2 => c2.Equals(c))) ||
+                    newDeckClone.Cards.Any(c => lastIterationCards.Any(c2 => c2.Equals(c) && c2.Count != c.Count) || !lastIterationCards.Any(c2 => c2.Equals(c))))
                     newDeckClone.Stats.NewDeckIteration(newDeckClone);
 
                 newDeckClone.Stats.DeckName = newDeckClone.Name;
@@ -3222,7 +3216,7 @@ namespace Hearthstone_Deck_Tracker
         private void BtnGames_Click(object sender, RoutedEventArgs e)
         {
             if(_gameHistoryWindow == null)
-                _gameHistoryWindow = new GameHistoryWindow(WriteDeckStats, DeckPickerList.UpdateList);
+                _gameHistoryWindow = new GameHistoryWindow(_config, WriteDeckStats, WriteConfig, DeckPickerList.UpdateList);
 
             var deck = DeckPickerList.SelectedDeck;
             if(deck != null)

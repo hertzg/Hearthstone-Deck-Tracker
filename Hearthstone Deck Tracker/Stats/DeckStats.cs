@@ -24,7 +24,8 @@ namespace Hearthstone_Deck_Tracker.Stats
         public DeckStats(Deck deck)
         {
             Iterations = new List<DeckIteration>();
-            Iterations.Add(new DeckIteration(deck));
+            var id = Iterations.Any() ? Iterations.Max(i => i.Id) + 1 : 0;
+            Iterations.Add(new DeckIteration(deck, id));
             DeckName = deck.Name;
         }
 
@@ -53,7 +54,8 @@ namespace Hearthstone_Deck_Tracker.Stats
         public void NewDeckIteration(Deck deck)
         {
             Debug.WriteLine("New deck iteration (" + DeckName + ")", "DeckStats");
-            Iterations.Add(new DeckIteration(deck));
+            var id = Iterations.Any() ? Iterations.Max(i => i.Id) + 1 : 0;
+            Iterations.Add(new DeckIteration(deck, id));
         }
 
         public void SetGameResult(GameStats.Result result)

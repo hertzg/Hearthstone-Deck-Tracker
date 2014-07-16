@@ -5,9 +5,9 @@
                       xmlns:sys="clr-namespace:System;assembly=mscorlib"        
                       xmlns:local="clr-namespace:Hearthstone_Deck_Tracker"
 
-                      Title="GameHistoryWindow" Height="554" Width="837" Closing="MetroWindow_Closing" BorderBrush="{DynamicResource AccentColorBrush}" BorderThickness="1">
+                      Title="GameHistoryWindow" Height="600" Width="900" Closing="MetroWindow_Closing" BorderBrush="{DynamicResource AccentColorBrush}" BorderThickness="1">
     <Grid>
-        <TabControl>
+        <TabControl Margin="0,36,0,0">
             <TabItem Header="Games">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -15,8 +15,8 @@
                         <RowDefinition Height="*"></RowDefinition>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"></ColumnDefinition>
                         <ColumnDefinition Width="auto"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
                     <controls:Flyout x:Name="FlyoutEditGame" Width="300" Height="auto" Header="Edit Game" Position="Right" Panel.ZIndex="1" Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="2">
                         <Label Content="stuff to edit game here"/>
@@ -34,9 +34,9 @@
                             </DataGrid>
                         </Grid>
                     </GroupBox>
-                    <GroupBox Header="Games" Grid.Row="1">
+                    <GroupBox Header="Games" Grid.Row="1" Width="auto" HorizontalAlignment="Left">
                         <Grid>
-                            <DataGrid CanUserAddRows="False" Name="DGrid" SelectionChanged="DGrid_SelectionChanged" Margin="0,0,0,40" AlternationCount="2" AutoGenerateColumns="False">
+                            <DataGrid CanUserAddRows="False" Name="DGrid" SelectionChanged="DGrid_SelectionChanged" Margin="0,0,0,40" AlternationCount="2" AutoGenerateColumns="False" CanUserDeleteRows="False" CanUserResizeColumns="False" CanUserResizeRows="False">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Result" Binding="{Binding GameResult}"></DataGridTextColumn>
                                     <DataGridTextColumn Header="Opponent" Binding="{Binding Opponent}"></DataGridTextColumn>
@@ -51,22 +51,23 @@
 
                         </Grid>
                     </GroupBox>
-                    <GroupBox Header="Game Details" HorizontalAlignment="Right" Grid.Row="1" Grid.Column="1" Width="360">
+                    <GroupBox Header="Game Details" Grid.Row="1" Grid.Column="1">
                         <Grid>
-                            <ListBox Name="ListboxGameDetail" Margin="0,56,0,0" BorderThickness="1"/>
-                            <CheckBox Content="Plays" HorizontalAlignment="Left" Margin="91,10,0,0" VerticalAlignment="Top"/>
-                            <CheckBox Content="Plays" HorizontalAlignment="Left" Margin="91,33,0,0" VerticalAlignment="Top"/>
-                            <CheckBox Content="Draws" HorizontalAlignment="Left" Margin="152,10,0,0" VerticalAlignment="Top"/>
-                            <CheckBox Content="Draws" HorizontalAlignment="Left" Margin="152,33,0,0" VerticalAlignment="Top"/>
-                            <CheckBox Content="Mulligan" HorizontalAlignment="Left" Margin="213,10,0,0" VerticalAlignment="Top"/>
-                            <CheckBox Content="Mulligan" HorizontalAlignment="Left" Margin="213,33,0,0" VerticalAlignment="Top"/>
+                            <!--<ListBox Name="ListboxGameDetail" Margin="0,56,0,0" BorderThickness="1" />-->
+                            <TreeView Name="TreeviewGameDetail" Margin="0,56,0,0" BorderThickness="1" BorderBrush="Black"/>
+                            <CheckBox Name="CheckboxPlayerPlay" Content="Plays" HorizontalAlignment="Left" Margin="91,10,0,0" VerticalAlignment="Top" Checked="CheckboxPlayerPlay_Checked" Unchecked="CheckboxPlayerPlay_Unchecked"/>
+                            <CheckBox Name="CheckboxOpponentPlay" Content="Plays" HorizontalAlignment="Left" Margin="91,33,0,0" VerticalAlignment="Top" Checked="CheckboxOpponentPlay_Checked" Unchecked="CheckboxOpponentPlay_Unchecked"/>
+                            <CheckBox Name="CheckboxPlayerDraw" Content="Draws" HorizontalAlignment="Left" Margin="152,10,0,0" VerticalAlignment="Top" Checked="CheckboxPlayerDraw_Checked" Unchecked="CheckboxPlayerDraw_Unchecked"/>
+                            <CheckBox Name="CheckboxOpponentDraw" Content="Draws" HorizontalAlignment="Left" Margin="152,33,0,0" VerticalAlignment="Top" Checked="CheckboxOpponentDraw_Checked" Unchecked="CheckboxOpponentDraw_Unchecked"/>
+                            <CheckBox Name="CheckboxPlayerMulligan" Content="Mulligan" HorizontalAlignment="Left" Margin="213,10,0,0" VerticalAlignment="Top" Checked="CheckboxPlayerMulligan_Checked" Unchecked="CheckboxPlayerMulligan_Unchecked"/>
+                            <CheckBox Name="CheckboxOpponentMulligan" Content="Mulligan" HorizontalAlignment="Left" Margin="213,33,0,0" VerticalAlignment="Top" Checked="CheckboxOpponentMulligan_Checked" Unchecked="CheckboxOpponentMulligan_Unchecked"/>
                             <Label Content="Player:" HorizontalAlignment="Left" Margin="10,6,0,0" VerticalAlignment="Top"/>
                             <Label Content="Opponent:" HorizontalAlignment="Left" Margin="10,29,0,0" VerticalAlignment="Top"/>
                         </Grid>
                     </GroupBox>
 
                 </Grid>
-                
+
             </TabItem>
             <TabItem Header="Deck Stats">
                 <Grid>
@@ -110,13 +111,14 @@
                             </GridView>
                         </ListView.View>
                     </ListView>
-                    <Label Content="Iteration" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
-                    <ComboBox Name="ComboboxDeckIteration" HorizontalAlignment="Left" Margin="70,10,0,0" VerticalAlignment="Top" Width="120"/>
                 </Grid>
             </TabItem>
         </TabControl>
+        <Label Content="Iteration" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
+        <ComboBox x:Name="ComboboxDeckIteration" HorizontalAlignment="Left" Margin="70,10,0,0" VerticalAlignment="Top" Width="200" SelectionChanged="ComboboxDeckIteration_SelectionChanged"/>
+        <Button Name="BtnDeleteIteration" Content="Delete Iteration" HorizontalAlignment="Left" Margin="287,10,0,0" VerticalAlignment="Top" Width="117" Click="BtnDeleteIteration_Click"/>
 
-        
+
 
     </Grid>
 </controls:MetroWindow>

@@ -133,7 +133,8 @@ namespace Hearthstone_Deck_Tracker
         {
             get { return _currentLogFile ?? GetLogFileName(); }
         }
-        
+
+
         private string GetLogFileName()
         {
             var date = DateTime.Now;
@@ -141,6 +142,18 @@ namespace Hearthstone_Deck_Tracker
                                             date.Hour,
                                             date.Minute, date.Second);
             return _currentLogFile;
+        }
+
+        public DeckStatsConfig DeckStats = new DeckStatsConfig();
+
+        public class DeckStatsConfig
+        {
+            public bool ShowPlayerPlay = true;
+            public bool ShowPlayerDraw = false;
+            public bool ShowPlayerMulligan = false;
+            public bool ShowOpponentPlay = true;
+            public bool ShowOpponentDraw = false;
+            public bool ShowOpponentMulligan = false;
         }
     }
 }

@@ -24,10 +24,8 @@ namespace Hearthstone_Deck_Tracker
         PlayerPlay,
         PlayerDeckDiscard,
         PlayerHandDiscard,
-        OpponentPlay,
         OpponentSecretTrigger,
         OpponentDeckDiscard,
-        OpponentHandDiscard,
         PlayerGet,
         OpponentPlayToHand,
     }
