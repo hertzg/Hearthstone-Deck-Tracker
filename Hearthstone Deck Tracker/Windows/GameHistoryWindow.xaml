@@ -71,7 +71,7 @@
             </TabItem>
             <TabItem Header="Deck Stats">
                 <Grid>
-                    <ListView Name="ListviewStats" Margin="0,45,0,0" AlternationCount="2">
+                    <ListView Name="ListviewStats">
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn Header="Card" Width="225">
@@ -88,25 +88,36 @@
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                <GridViewColumn Header="Total">
+                                <GridViewColumn Header="" Width="auto">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Margin="0,-17,0,0">
+                                                <TextBlock Text="Avg turns in hand (win/loss):"/>
+                                                <TextBlock Text="% of games drawn (win/loss):" />
+                                                <TextBlock Text="% of games played (win/loss):" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                <GridViewColumn Header="Druid">
+                                <GridViewColumn Header="Total" DisplayMemberBinding="{Binding CardStats[0]}">
                                 </GridViewColumn>
-                                <GridViewColumn Header="Hunter">
+                                <GridViewColumn Header="Druid" DisplayMemberBinding="{Binding CardStats[1]}">
                                 </GridViewColumn>
-                                <GridViewColumn Header="Mage">
+                                <GridViewColumn Header="Hunter" DisplayMemberBinding="{Binding CardStats[2]}">
                                 </GridViewColumn>
-                                <GridViewColumn Header="Paladin">
+                                <GridViewColumn Header="Mage" DisplayMemberBinding="{Binding CardStats[3]}">
                                 </GridViewColumn>
-                                <GridViewColumn Header="Priest">
+                                <GridViewColumn Header="Paladin" DisplayMemberBinding="{Binding CardStats[4]}">
                                 </GridViewColumn>
-                                <GridViewColumn Header="Rogue">
+                                <GridViewColumn Header="Priest" DisplayMemberBinding="{Binding CardStats[5]}">
                                 </GridViewColumn>
-                                <GridViewColumn Header="Shaman">
+                                <GridViewColumn Header="Rogue" DisplayMemberBinding="{Binding CardStats[6]}">
                                 </GridViewColumn>
-                                <GridViewColumn Header="Warlock">
+                                <GridViewColumn Header="Shaman" DisplayMemberBinding="{Binding CardStats[7]}">
                                 </GridViewColumn>
-                                <GridViewColumn Header="Warrior">
+                                <GridViewColumn Header="Warlock" DisplayMemberBinding="{Binding CardStats[8]}">
+                                </GridViewColumn>
+                                <GridViewColumn Header="Warrior" DisplayMemberBinding="{Binding CardStats[9]}">
                                 </GridViewColumn>
                             </GridView>
                         </ListView.View>

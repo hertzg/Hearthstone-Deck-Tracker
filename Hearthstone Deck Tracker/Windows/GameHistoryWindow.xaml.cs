@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -85,6 +86,7 @@ namespace Hearthstone_Deck_Tracker
             {
                 ComboboxDeckIteration.Items.Add(iteration);
             }
+            ReloadTreeView();
         }
 
         private void MetroWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -284,6 +286,8 @@ namespace Hearthstone_Deck_Tracker
         {
             if (!_initialized) return;
             var selectedGame = DGrid.SelectedItem as GameStats;
+            
+            var cardStatsObjects = new List<CardStatsObject>();
 
             var item = ComboboxDeckIteration.SelectedItem;
             if (item == "All")
@@ -291,13 +295,35 @@ namespace Hearthstone_Deck_Tracker
 
                 _gameStats =
                     new ObservableCollection<GameStats>(_currentDeckStats.Iterations.SelectMany(i => i.GameStats));
+
+                //no idea how well this works
+                foreach (var card in _currentDeckStats.Iterations.SelectMany(i => i.Cards))
+                {
+                    if (cardStatsObjects.All(cso => cso.CardName != card.LocalizedName))
+                    {
+                        cardStatsObjects.Add(new CardStatsObject(card, _gameStats));
+                    }
+                }
             }
             else if(item is DeckIteration)
             {
                 _gameStats = new ObservableCollection<GameStats>(((DeckIteration) item).GameStats);
+                foreach (var card in ((DeckIteration)item).Cards)
+                {
+                    if (cardStatsObjects.All(cso => cso.CardName != card.LocalizedName))
+                    {
+                        cardStatsObjects.Add(new CardStatsObject(card, _gameStats));
+                    }
+                }
             }
 
             DGrid.ItemsSource = _gameStats;
+            DGrid.Items.SortDescriptions.Clear();
+            DGrid.Items.SortDescriptions.Add(new SortDescription("Started", ListSortDirection.Descending));
+            if (DGrid.Items.Count > 0)
+            {
+                DGrid.SelectedIndex = 0;
+            }
 
 
             var total = _currentDeckStats.Iterations.Sum(i => i.GameStats.Count);
@@ -307,6 +333,11 @@ namespace Hearthstone_Deck_Tracker
                     new WinLoss(_gameStats.Where(gs => gs.GameResult == GameStats.Result.Loss).ToList(), "Loss", total)
                 };
             DataGridWinLoss.ItemsSource = winLossList;
+
+
+
+
+            ListviewStats.ItemsSource = cardStatsObjects;
 
             if (DGrid.Items.Contains(selectedGame))
                 DGrid.SelectedItem = selectedGame;
@@ -342,6 +373,97 @@ namespace Hearthstone_Deck_Tracker
                 _writeDeckStats();
                 ComboboxDeckIteration.SelectedIndex = 0;
                 ComboboxDeckIteration.Items.Remove(iteration);
+            }
+        }
+
+        private class CardStatsObject
+        {
+            public ImageBrush CardBackground { get; set; }
+            public string CardName { get; set; }
+            public int CardCost { get; set; }
+            private readonly IEnumerable<GameStats> _gameStats;
+            private string _cardId;
+            private Card _card;
+            public CardStatsObject(Card card, IEnumerable<GameStats> currentGameStats)
+            {
+                CardBackground = card.Background;
+                CardCost = card.Cost;
+                CardName = card.LocalizedName;
+                _gameStats = currentGameStats;
+                _cardId = card.Id;
+                _card = card;
+            }
+
+            public string[] CardStats
+            {
+                get { return _hsClasses.Select(GetCardStats).ToArray(); }
+            }
+
+            private readonly List<string> _hsClasses = new List<string>()
+            {
+                "All", 
+                "Druid", 
+                "Hunter", 
+                "Mage", 
+                "Paladin", 
+                "Priest", 
+                "Rogue", 
+                "Shaman", 
+                "Warlock", 
+                "Warrior", 
+            };
+
+            private string GetCardStats(string opponent)
+            {
+                var avgDrawTurn = new double[2];
+                var drawCount = new int[2];
+                var avgPlayTurn = new double[2];
+                var playCount = new int[2];
+                foreach (var gs in _gameStats.Where(gs => gs.Opponent == opponent || opponent == "All"))
+                {
+                    var foundDraw = false;
+                    bool foundPlay = false;
+                    var index = gs.GameResult == GameStats.Result.Win ? 0 : 1;
+                    foreach (var ts in gs.TurnStats)
+                    {
+                        foreach (var play in ts.Plays)
+                        {
+                            if (play.CardId == _cardId)
+                            {
+                                if (play.Type == "PlayerDraw")
+                                {
+                                    avgDrawTurn[index] += ts.Turn;
+                                    drawCount[index]++;
+                                    foundDraw = true;
+                                }
+                                else if (play.Type == "PlayerPlay" || play.Type == "PlayerHandDiscard")
+                                {
+                                    avgPlayTurn[index] += ts.Turn;
+                                    playCount[index]++;
+                                    foundPlay = true;
+                                }
+                            }
+                        }
+                    }
+                    if (!foundPlay && foundDraw)
+                    {
+                        avgPlayTurn[index] += gs.TotalTurns;
+                        playCount[index]++;
+                    }
+                }
+
+                avgPlayTurn[0] = playCount[0] > 0 ? avgPlayTurn[0] / playCount[0] : 0;
+                avgDrawTurn[0] = drawCount[0] > 0 ? avgDrawTurn[0] / drawCount[0] : 0;
+                avgPlayTurn[1] = playCount[1] > 0 ? avgPlayTurn[1] / playCount[1] : 0;
+                avgDrawTurn[1] = drawCount[1] > 0 ? avgDrawTurn[1] / drawCount[1] : 0;
+
+                var returnStrings = new string[2];
+                returnStrings[0] = drawCount[0] > 0 ? Math.Round(avgPlayTurn[0] - avgDrawTurn[0], 2).ToString() : "-";
+                returnStrings[1] = drawCount[1] > 0 ? Math.Round(avgPlayTurn[1] - avgDrawTurn[1], 2).ToString() : "-";
+
+                return returnStrings[0] + "/" + returnStrings[1] + "\n" +
+                    100 * drawCount[0] / _card.Count / _gameStats.Count(gs => gs.GameResult == GameStats.Result.Win) + "%/" + 100 * drawCount[1] / _card.Count / _gameStats.Count(gs => gs.GameResult == GameStats.Result.Loss) + "%\n" +
+                    100 * playCount[0] / _card.Count / _gameStats.Count(gs => gs.GameResult == GameStats.Result.Win) + "%/" + 100 * playCount[1] / _card.Count / _gameStats.Count(gs => gs.GameResult == GameStats.Result.Loss) + "%\n";
             }
         }
     }
