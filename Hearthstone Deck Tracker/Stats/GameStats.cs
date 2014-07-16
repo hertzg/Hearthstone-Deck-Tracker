@@ -27,7 +27,7 @@ namespace Hearthstone_Deck_Tracker.Stats
         [XmlIgnore]
         public string GotCoin
         {
-            get { return Coin ? "No" : "Yes"; }
+            get { return Coin ? "Yes" : "No"; }
         }
 
         [XmlIgnore]
@@ -45,7 +45,6 @@ namespace Hearthstone_Deck_Tracker.Stats
         {
             get { return Start.ToShortDateString() + " " + Start.ToShortTimeString(); }
         }
-
 
         
         [XmlArray(ElementName = "Turns")]
