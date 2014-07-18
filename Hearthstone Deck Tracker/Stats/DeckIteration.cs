@@ -93,12 +93,7 @@ namespace Hearthstone_Deck_Tracker.Stats
             }
         }
 
-        public void AddPlay(CardMovementType type, string cardId)
-        {
-            _currentGame.AddPlay(type, cardId);
-        }
-
-        public void AddPlay(OpponentHandMovement type, string cardId)
+        public void AddPlay(string type, string cardId)
         {
             _currentGame.AddPlay(type, cardId);
         }

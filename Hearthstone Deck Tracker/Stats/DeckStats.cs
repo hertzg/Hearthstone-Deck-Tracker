@@ -29,12 +29,7 @@ namespace Hearthstone_Deck_Tracker.Stats
             DeckName = deck.Name;
         }
 
-        public void AddPlay(CardMovementType type, string cardId)
-        {
-            Iterations.Last().AddPlay(type, cardId);
-        }
-
-        public void AddPlay(OpponentHandMovement type, string cardId)
+        public void AddPlay(string type, string cardId)
         {
             Iterations.Last().AddPlay(type, cardId);
         }

@@ -25,7 +25,7 @@ namespace Hearthstone_Deck_Tracker.Stats
             Turn = turn;
         }
 
-        public void AddPlay(CardMovementType type, string cardId)
+        public void AddPlay(string type, string cardId)
         {
             Plays.Add(new Play(type, cardId));
         }
@@ -36,25 +36,14 @@ namespace Hearthstone_Deck_Tracker.Stats
             {
                 
             }
-            public Play(CardMovementType type, string cardId)
+            public Play(string type, string cardId)
             {
-                Type = Enum.GetName(typeof(CardMovementType), type);
-                CardId = cardId;
-            }
-
-            public Play(OpponentHandMovement type, string cardId)
-            {
-                Type = "Opponent" + Enum.GetName(typeof(OpponentHandMovement), type);
+                Type = type;
                 CardId = cardId;
             }
 
             public string Type;
             public string CardId;
-        }
-
-        public void AddPlay(OpponentHandMovement type, string cardId)
-        {
-            Plays.Add(new Play(type, cardId));
         }
     }
 }

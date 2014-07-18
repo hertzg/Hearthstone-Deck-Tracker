@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Hearthstone_Deck_Tracker.Hearthstone;
 
 #endregion
 
@@ -117,6 +118,20 @@ namespace Hearthstone_Deck_Tracker
         public string Id { get; private set; }
     }
 
+    public class HeroPowerUseArgs : EventArgs
+    {
+        public HeroPowerUseArgs(string heroPowerId, int turn, Turn player)
+        {
+            HeroPowerId = heroPowerId;
+            TurnNumer = turn;
+            Player = player;
+        }
+
+        public string HeroPowerId { get; private set; }
+        public int TurnNumer { get; private set; }
+        public Turn Player { get; private set; }
+    }
+
     public class HsLogReader
     {
         public delegate void AnalyzingHandler(HsLogReader sender, AnalyzingArgs args);
@@ -128,6 +143,8 @@ namespace Hearthstone_Deck_Tracker
         public delegate void GameStateHandler(HsLogReader sender, GameStateArgs args);
 
         public delegate void TurnStartHandler(HsLogReader sender, TurnStartArgs args);
+
+        public delegate void HeroPowerUseHandler(HsLogReader sender, HeroPowerUseArgs args);
 
         private const int PowerCountTreshold = 14;
 
@@ -200,6 +217,7 @@ namespace Hearthstone_Deck_Tracker
         public event AnalyzingHandler Analyzing;
         public event TurnStartHandler TurnStart;
         public event CardPosChangeHandler CardPosChange;
+        public event HeroPowerUseHandler HeroPowerUse;
 
         private async void ReadFileAsync()
         {
@@ -280,6 +298,10 @@ namespace Hearthstone_Deck_Tracker
             }
         }
 
+        private readonly Regex _heroPowerRegex = new Regex(@".*(cardId=(?<Id>(\w*))).*");
+        private Turn _currentPlayer;
+        private bool _playerUsedHeroPower;
+        private bool _opponentUsedHeroPower;
         private void Analyze(string log)
         {
             var logLines = log.Split('\n');
@@ -289,6 +311,28 @@ namespace Hearthstone_Deck_Tracker
                 if (logLine.StartsWith("[Power]"))
                 {
                     _powerCount++;
+
+                    if((_currentPlayer == Turn.Player && !_playerUsedHeroPower) || _currentPlayer == Turn.Opponent && !_opponentUsedHeroPower)
+                    {
+                        if (_heroPowerRegex.IsMatch(logLine))
+                        {
+                            var id = _heroPowerRegex.Match(logLine).Groups["Id"].Value.Trim();
+                            if (!string.IsNullOrEmpty(id))
+                            {
+                                var heroPower = Game.GetCardFromId(id);
+                                if (heroPower.Type == "Hero Power")
+                                {
+                                    if (HeroPowerUse != null)
+                                        HeroPowerUse(this, new HeroPowerUseArgs(id, GetTurnNumber(), _currentPlayer));
+
+                                    if (_currentPlayer == Turn.Player)
+                                        _playerUsedHeroPower = true;
+                                    else _opponentUsedHeroPower = true;
+                                }
+
+                            }
+                        }
+                    }
                 }
                 else if (logLine.StartsWith("[Bob] legend rank"))
                 {
@@ -358,8 +402,10 @@ namespace Hearthstone_Deck_Tracker
                                 {
                                     if (_powerCount >= PowerCountTreshold)
                                     {
-                                        TurnStart(this, new TurnStartArgs(Turn.Player));
                                         _turnCount++;
+                                        TurnStart(this, new TurnStartArgs(Turn.Player));
+                                        _currentPlayer = Turn.Player;
+                                        _playerUsedHeroPower = false;
                                     }
 
                                     //player draw
@@ -408,8 +454,10 @@ namespace Hearthstone_Deck_Tracker
                                 {
                                     if (_powerCount >= PowerCountTreshold)
                                     {
-                                        TurnStart(this, new TurnStartArgs(Turn.Opponent));
                                         _turnCount++;
+                                        TurnStart(this, new TurnStartArgs(Turn.Opponent));
+                                        _currentPlayer = Turn.Opponent;
+                                        _opponentUsedHeroPower = false;
                                     }
 
                                     //opponent draw
@@ -450,11 +498,7 @@ namespace Hearthstone_Deck_Tracker
                                 {
                                     //coin, thoughtsteal etc
                                     CardMovement(this, new CardMovementArgs(CardMovementType.PlayerGet, id));
-                                    if (_turnCount < 2 && id == "GAME_005")
-                                    {
-                                        //increment turn count once in case player goes second (check turn count to avoid this from happening when thoughsteal takes coin)
-                                        _turnCount++;
-                                    }
+
                                 }
                                 else if (to == "FRIENDLY GRAVEYARD" && from == "")
                                 {

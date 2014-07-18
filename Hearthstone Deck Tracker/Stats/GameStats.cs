@@ -60,7 +60,7 @@ namespace Hearthstone_Deck_Tracker.Stats
             Start = DateTime.Now;
         }
 
-        public void AddPlay(CardMovementType type, string cardId)
+        public void AddPlay(string type, string cardId)
         {
             var turnStats = TurnStats.FirstOrDefault(t => t.Turn == TotalTurns);
             if (turnStats == null)
@@ -71,15 +71,5 @@ namespace Hearthstone_Deck_Tracker.Stats
             turnStats.AddPlay(type, cardId);
         }
 
-        public void AddPlay(OpponentHandMovement type, string cardId)
-        {
-            var turnStats = TurnStats.FirstOrDefault(t => t.Turn == TotalTurns);
-            if (turnStats == null)
-            {
-                turnStats = new TurnStats() { Turn = TotalTurns };
-                TurnStats.Add(turnStats);
-            }
-            turnStats.AddPlay(type, cardId);
-        }
     }
 }

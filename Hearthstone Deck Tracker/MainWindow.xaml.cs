@@ -464,6 +464,7 @@ namespace Hearthstone_Deck_Tracker
             _logReader.Analyzing += LogReaderOnAnalyzing;
             _logReader.TurnStart += LogReaderOnTurnStart;
             _logReader.CardPosChange += LogReaderOnCardPosChange;
+            _logReader.HeroPowerUse += LogReaderHeroPowerUse;
 
             _turnTimer = new TurnTimer(90);
             _turnTimer.TimerTick += TurnTimerOnTimerTick;
@@ -505,7 +506,20 @@ namespace Hearthstone_Deck_Tracker
             Helper.SortCardCollection(ListViewDeck.Items, _config.CardSortingClassFirst);
         }
 
+
         #region LogReader Events
+
+        private void LogReaderHeroPowerUse(HsLogReader sender, HeroPowerUseArgs args)
+        {
+            var type = (args.Player == Turn.Player ? "Player" : "Opponent") + "HeroPower";
+
+            Logger.WriteLine(string.Format("{0} (id:{1} turn:{2})", type, args.HeroPowerId, args.TurnNumer), "LogReader");
+
+            if (_game.IsUsingPremade && _game.IsRunning)
+            {
+                _currentDeckStats.AddPlay(type, args.HeroPowerId);
+            }
+        }
 
         private void TurnTimerOnTimerTick(TurnTimer sender, TimerEventArgs timerEventArgs)
         {
@@ -520,7 +534,7 @@ namespace Hearthstone_Deck_Tracker
 
             if (_game.IsUsingPremade && _game.IsRunning)
             {
-                _currentDeckStats.AddPlay(args.Action, args.Id);
+                _currentDeckStats.AddPlay(Enum.GetName(typeof(CardMovementType), args.Action), args.Id);
             }
 
             switch (args.Action)
@@ -542,7 +556,7 @@ namespace Hearthstone_Deck_Tracker
 
         private void LogReaderOnTurnStart(HsLogReader sender, TurnStartArgs args)
         {
-            Logger.WriteLine(string.Format("{0}-turn ({1})", args.Turn, sender.GetTurnNumber() + 1), "LogReader");
+            Logger.WriteLine(string.Format("{0}-turn ({1})", args.Turn, sender.GetTurnNumber()), "LogReader");
             //doesn't really matter whose turn it is for now, just restart timer
             //maybe add timer to player/opponent windows
             _turnTimer.SetCurrentPlayer(args.Turn);
@@ -655,7 +669,7 @@ namespace Hearthstone_Deck_Tracker
 
             if (_game.IsUsingPremade && _game.IsRunning)
             {
-                _currentDeckStats.AddPlay(args.MovementType, args.CardId);
+                _currentDeckStats.AddPlay(Enum.GetName(typeof(CardMovementType),args.MovementType), args.CardId);
             }
 
             switch (args.MovementType)
