@@ -542,7 +542,7 @@ namespace Hearthstone_Deck_Tracker
 
             if (_game.IsUsingPremade && _game.IsRunning)
             {
-                _currentDeckStats.AddPlay(Enum.GetName(typeof(CardMovementType), args.Action), args.Id);
+                _currentDeckStats.AddPlay("Opponent" + Enum.GetName(typeof(OpponentHandMovement), args.Action), args.Id);
             }
 
             switch (args.Action)
