@@ -29,6 +29,7 @@ using ListViewItem = System.Windows.Controls.ListViewItem;
 using MessageBox = System.Windows.MessageBox;
 using MouseEventArgs = System.Windows.Forms.MouseEventArgs;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
+using Point = System.Windows.Point;
 using SystemColors = System.Windows.SystemColors;
 
 #endregion
@@ -543,6 +544,10 @@ namespace Hearthstone_Deck_Tracker
 		private void MetroWindow_Activated(object sender, EventArgs e)
 		{
 			Topmost = true;
+			if(_externalFlyout != null && _externalFlyout.IsLoaded)
+			{
+				_externalFlyout.Topmost = true;
+			}
 		}
 
 		private void MetroWindow_Deactivated(object sender, EventArgs e)
@@ -1110,9 +1115,46 @@ namespace Hearthstone_Deck_Tracker
 				DeckStatsFlyout.SetDeck(deck);
 		}
 
+		private ExternalFlyout _externalFlyout;
+		private bool _extFlyoutMoved;
 		private void BtnDeckOptions_Click(object sender, RoutedEventArgs e)
 		{
-			FlyoutDeckOptions.IsOpen = true;
+			//FlyoutDeckOptions.IsOpen = true;
+			if(_externalFlyout == null || !_externalFlyout.IsLoaded)
+			{
+				_externalFlyout = new ExternalFlyout();
+				var deckOptions = new DeckOptions();
+				deckOptions.EnableButtons(true);
+				_externalFlyout.Content = deckOptions;
+				var pos = PointToScreen(new Point(Width, 0));
+				_externalFlyout.SetLocation(pos.Y, pos.X);
+				_externalFlyout.Height = Height;
+				_externalFlyout.Show();
+			}
+			else
+			{
+				_externalFlyout.Close();
+			}
+
+		}
+
+
+		private void MetroWindow_LocationChanged(object sender, EventArgs e)
+		{
+			//todo move to correct region
+			if (!_extFlyoutMoved && _externalFlyout != null && _externalFlyout.IsLoaded)
+			{
+				_externalFlyout.SetLocation(Top, Left + Width);
+				_externalFlyout.Height = Height;
+			}
+		}
+
+		public void SetLocation(double top, double left)
+		{
+			_extFlyoutMoved = true;
+			Top = top;
+			Left = left;
+			_extFlyoutMoved = false;
 		}
 
 		#endregion
@@ -2577,5 +2619,6 @@ namespace Hearthstone_Deck_Tracker
 		}
 
 		#endregion
+
 	}
 }

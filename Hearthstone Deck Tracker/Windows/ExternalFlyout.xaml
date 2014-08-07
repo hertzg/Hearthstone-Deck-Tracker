@@ -1,0 +1,25 @@
+﻿<controls:MetroWindow x:Name="metroWindow" x:Class="Hearthstone_Deck_Tracker.ExternalFlyout"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        Title="ExternalFlyout" Height="auto" Width="250" ResizeMode="NoResize" WindowStyle="ToolWindow" 
+        BorderThickness="1" BorderBrush="{DynamicResource AccentColorBrush}" LocationChanged="MetroWindow_LocationChanged" Closing="Window_Closing">
+	<controls:MetroWindow.Resources>
+		<Storyboard x:Key="OnLoaded1">
+			<DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(FrameworkElement.Width)" Storyboard.TargetName="metroWindow">
+				<EasingDoubleKeyFrame KeyTime="0" Value="0.235"/>
+				<EasingDoubleKeyFrame KeyTime="0:0:0.3" Value="250"/>
+			</DoubleAnimationUsingKeyFrames>
+		</Storyboard>
+		<Storyboard x:Key="StoryboardClose">
+			<DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="(FrameworkElement.Width)" Storyboard.TargetName="metroWindow" Completed="closeStoryBoard_Completed">
+				<EasingDoubleKeyFrame KeyTime="0:0:0.3" Value="0"/>
+			</DoubleAnimationUsingKeyFrames>
+		</Storyboard>
+	</controls:MetroWindow.Resources>
+    <controls:MetroWindow.Triggers>
+        <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+            <BeginStoryboard x:Name="OnLoaded1_BeginStoryboard" Storyboard="{StaticResource OnLoaded1}"/>
+        </EventTrigger>
+    </controls:MetroWindow.Triggers>
+</controls:MetroWindow>

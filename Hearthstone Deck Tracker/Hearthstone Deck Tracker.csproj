@@ -153,6 +153,9 @@
     <Compile Include="Windows\DeckSelectionDialog.xaml.cs">
       <DependentUpon>DeckSelectionDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Windows\ExternalFlyout.xaml.cs">
+      <DependentUpon>ExternalFlyout.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\OpponentWindow.xaml.cs">
       <DependentUpon>OpponentWindow.xaml</DependentUpon>
     </Compile>
@@ -227,6 +230,10 @@
     </Compile>
     <Compile Include="Config.cs" />
     <Page Include="Windows\DeckSelectionDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Windows\ExternalFlyout.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
