@@ -605,7 +605,6 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
 
 		public static bool IsActualCard(Card card)
 		{
-			if(card == null) return false;
 			return (card.Type == "Minion"
 			        || card.Type == "Spell"
 			        || card.Type == "Weapon")
