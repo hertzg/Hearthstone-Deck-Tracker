@@ -82,6 +82,7 @@ namespace Hearthstone_Deck_Tracker
 		public double OpponentOpacity = Defaults.OpponentOpacity;
 		public int OpponentWindowHeight = Defaults.OpponentWindowHeight;
 		public int? OpponentWindowLeft = Defaults.OpponentWindowLeft;
+		public bool OpponentWindowOnStart = Defaults.OpponentWindowOnStart;
 		public int? OpponentWindowTop = Defaults.OpponentWindowTop;
 		public bool OverlayCardToolTips = Defaults.OverlayCardToolTips;
 		public double OverlayOpacity = Defaults.OverlayOpacity;
@@ -97,6 +98,7 @@ namespace Hearthstone_Deck_Tracker
 		public double PlayerOpacity = Defaults.PlayerOpacity;
 		public int PlayerWindowHeight = Defaults.PlayerWindowHeight;
 		public int? PlayerWindowLeft = Defaults.PlayerWindowLeft;
+		public bool PlayerWindowOnStart = Defaults.PlayerWindowOnStart;
 		public int? PlayerWindowTop = Defaults.PlayerWindowTop;
 		public bool PrioritizeGolden = Defaults.PrioritizeGolden;
 		public bool RecordArena = Defaults.RecordArena;
@@ -128,9 +130,12 @@ namespace Hearthstone_Deck_Tracker
 		public bool StartMinimized = Defaults.StartMinimized;
 		public bool StatsClassOverviewIsExpanded = Defaults.StatsClassOverviewIsExpanded;
 		public bool StatsDeckOverviewIsExpanded = Defaults.StatsDeckOverviewIsExpanded;
+		public bool StatsInWindow = Defaults.StatsInWindow;
+		public int StatsWindowHeight = Defaults.StatsWindowHeight;
+		public int? StatsWindowLeft = Defaults.StatsWindowLeft;
+		public int? StatsWindowTop = Defaults.StatsWindowTop;
+		public int StatsWindowWidth = Defaults.StatsWindowWidth;
 		public Operation TagOperation = Defaults.TagOperation;
-		public bool TextOnTopOpponent = Defaults.TextOnTopOpponent;
-		public bool TextOnTopPlayer = Defaults.TextOnTopPlayer;
 		public string ThemeName = Defaults.ThemeName;
 		public double TimerLeft = Defaults.TimerLeft;
 		public int TimerWindowHeight = Defaults.TimerWindowHeight;
@@ -154,7 +159,6 @@ namespace Hearthstone_Deck_Tracker
 		public bool WindowCardToolTips = Defaults.WindowCardToolTips;
 		public int WindowHeight = Defaults.WindowHeight;
 		public string WindowsBackgroundHex = Defaults.WindowsBackgroundHex;
-		public bool WindowsOnStartup = Defaults.WindowsOnStartup;
 		public bool WindowsTopmost = Defaults.WindowsTopmost;
 		public bool WindowsTopmostIfHsForeground = Defaults.WindowsTopmostIfHsForeground;
 		private string _currentLogFile;
@@ -331,6 +335,7 @@ namespace Hearthstone_Deck_Tracker
 			public static readonly double OpponentOpacity = 100;
 			public static readonly int OpponentWindowHeight = 400;
 			public static readonly int? OpponentWindowLeft = null;
+			public static readonly bool OpponentWindowOnStart = false;
 			public static readonly int? OpponentWindowTop = null;
 			public static readonly bool OverlayCardToolTips = true;
 			public static readonly double OverlayOpacity = 100;
@@ -346,6 +351,7 @@ namespace Hearthstone_Deck_Tracker
 			public static readonly string[] PanelOrderOpponent = new[] {"Win Rate", "Cards", "Draw Chances", "Card Counter"};
 			public static readonly int PlayerWindowHeight = 400;
 			public static readonly int? PlayerWindowLeft = null;
+			public static readonly bool PlayerWindowOnStart = false;
 			public static readonly int? PlayerWindowTop = null;
 			public static readonly bool PrioritizeGolden = true;
 			public static readonly bool RecordArena = true;
@@ -373,9 +379,12 @@ namespace Hearthstone_Deck_Tracker
 			public static readonly bool StartMinimized = false;
 			public static readonly bool StatsClassOverviewIsExpanded = false;
 			public static readonly bool StatsDeckOverviewIsExpanded = true;
+			public static readonly bool StatsInWindow = false;
+			public static readonly int StatsWindowHeight = 672;
+			public static readonly int? StatsWindowLeft = null;
+			public static readonly int? StatsWindowTop = null;
+			public static readonly int StatsWindowWidth = 510;
 			public static readonly Operation TagOperation = Operation.Or;
-			public static readonly bool TextOnTopOpponent = false;
-			public static readonly bool TextOnTopPlayer = false;
 			public static readonly string ThemeName;
 			public static readonly double TimerLeft = 75;
 			public static readonly int TimerWindowHeight = 130;
@@ -399,7 +408,6 @@ namespace Hearthstone_Deck_Tracker
 			public static readonly bool WindowCardToolTips = true;
 			public static readonly int WindowHeight = 672;
 			public static readonly string WindowsBackgroundHex = "#696969";
-			public static readonly bool WindowsOnStartup = false;
 			public static readonly bool WindowsTopmost = false;
 			public static readonly bool WindowsTopmostIfHsForeground = false;
 		}

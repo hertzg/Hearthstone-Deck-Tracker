@@ -7,6 +7,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using Hearthstone_Deck_Tracker.Hearthstone;
 using Hearthstone_Deck_Tracker.Stats;
+using Hearthstone_Deck_Tracker.Windows;
+using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 
 namespace Hearthstone_Deck_Tracker
@@ -25,9 +27,7 @@ namespace Hearthstone_Deck_Tracker
 		{
 			InitializeComponent();
 			ComboboxGameMode.ItemsSource = Enum.GetValues(typeof(Game.GameMode));
-			_isGroupBoxExpanded = new Dictionary<GroupBox, bool>();
-			_isGroupBoxExpanded.Add(GroupboxDeckOverview, true);
-			_isGroupBoxExpanded.Add(GroupboxClassOverview, true);
+			_isGroupBoxExpanded = new Dictionary<GroupBox, bool> {{GroupboxDeckOverview, true}, {GroupboxClassOverview, true}};
 		}
 
 		public void LoadConfig()
@@ -44,6 +44,12 @@ namespace Hearthstone_Deck_Tracker
 			if(_deck == null)
 				return;
 
+			MetroWindow window;
+			if(Config.Instance.StatsInWindow)
+				window = Helper.MainWindow.StatsWindow;
+			else
+				window = Helper.MainWindow;
+
 			var count = DataGridGames.SelectedItems.Count;
 			if(count == 1)
 			{
@@ -51,7 +57,7 @@ namespace Hearthstone_Deck_Tracker
 				if(selectedGame == null)
 					return;
 
-				if(await Helper.MainWindow.ShowDeleteGameStatsMessage(selectedGame) != MessageDialogResult.Affirmative)
+				if(await MessageDialogs.ShowDeleteGameStatsMessage(window, selectedGame) != MessageDialogResult.Affirmative)
 					return;
 
 				if(_deck.DeckStats.Games.Contains(selectedGame))
@@ -66,7 +72,7 @@ namespace Hearthstone_Deck_Tracker
 			}
 			else if(count > 1)
 			{
-				if(await Helper.MainWindow.ShowDeleteMultipleGameStatsMessage(count) != MessageDialogResult.Affirmative)
+				if(await MessageDialogs.ShowDeleteMultipleGameStatsMessage(window, count) != MessageDialogResult.Affirmative)
 					return;
 				foreach(var selectedItem in DataGridGames.SelectedItems)
 				{
@@ -86,6 +92,7 @@ namespace Hearthstone_Deck_Tracker
 		public void SetDeck(Deck deck)
 		{
 			_deck = deck;
+			if(deck == null) return;
 			var selectedGameMode = (Game.GameMode)ComboboxGameMode.SelectedItem;
 			var comboboxString = ComboboxTime.SelectedValue.ToString();
 			var timeFrame = DateTime.Now.Date;
@@ -107,10 +114,13 @@ namespace Hearthstone_Deck_Tracker
 					timeFrame = new DateTime();
 					break;
 			}
+			var noteFilter = TextboxNoteFilter.Text;
 			DataGridGames.Items.Clear();
 			var filteredGames = deck.DeckStats.Games.Where(g => (g.GameMode == selectedGameMode
 			                                                     || selectedGameMode == Game.GameMode.All)
-			                                                    && g.StartTime > timeFrame).ToList();
+			                                                    && g.StartTime > timeFrame
+			                                                    && (g.Note == null && noteFilter == string.Empty
+			                                                        || g.Note != null && g.Note.Contains(noteFilter))).ToList();
 			foreach(var game in filteredGames)
 				DataGridGames.Items.Add(game);
 			DataGridWinLoss.Items.Clear();
@@ -123,7 +133,9 @@ namespace Hearthstone_Deck_Tracker
 			                     .SelectMany(d => d.DeckStats.Games
 			                                       .Where(g => (g.GameMode == selectedGameMode
 			                                                    || selectedGameMode == Game.GameMode.All)
-			                                                   && g.StartTime > timeFrame)).ToList();
+			                                                   && g.StartTime > timeFrame
+			                                                   && (g.Note == null && noteFilter == string.Empty
+			                                                       || g.Note != null && g.Note.Contains(noteFilter)))).ToList();
 			DataGridWinLossClass.Items.Add(new WinLoss(allGames, "%"));
 			DataGridWinLossClass.Items.Add(new WinLoss(allGames, "Win - Loss"));
 			DataGridGames.Items.SortDescriptions.Clear();
@@ -154,9 +166,18 @@ namespace Hearthstone_Deck_Tracker
 			var selected = DataGridGames.SelectedItem as GameStats;
 			if(selected != null)
 			{
-				Helper.MainWindow.GameDetailsFlyout.SetGame(selected);
-				Helper.MainWindow.FlyoutGameDetails.Header = selected.ToString();
-				Helper.MainWindow.FlyoutGameDetails.IsOpen = true;
+				if(Config.Instance.StatsInWindow)
+				{
+					Helper.MainWindow.StatsWindow.GameDetailsFlyout.SetGame(selected);
+					Helper.MainWindow.StatsWindow.FlyoutGameDetails.Header = selected.ToString();
+					Helper.MainWindow.StatsWindow.FlyoutGameDetails.IsOpen = true;
+				}
+				else
+				{
+					Helper.MainWindow.GameDetailsFlyout.SetGame(selected);
+					Helper.MainWindow.FlyoutGameDetails.Header = selected.ToString();
+					Helper.MainWindow.FlyoutGameDetails.IsOpen = true;
+				}
 			}
 		}
 
@@ -178,27 +199,23 @@ namespace Hearthstone_Deck_Tracker
 
 		private void DGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			if(DataGridGames.SelectedItems.Count > 0)
-			{
-				BtnDelete.IsEnabled = true;
-				BtnDetails.IsEnabled = true;
-				BtnNote.IsEnabled = true;
-			}
-			else
-			{
-				BtnDelete.IsEnabled = false;
-				BtnDetails.IsEnabled = false;
-				BtnNote.IsEnabled = false;
-			}
+			var enabled = DataGridGames.SelectedItems.Count > 0;
+			BtnDelete.IsEnabled = enabled;
+			BtnDetails.IsEnabled = enabled;
+			BtnNote.IsEnabled = enabled;
+			BtnMoveToOtherDeck.IsEnabled = enabled;
 		}
 
 		private async void BtnEditNote_Click(object sender, RoutedEventArgs e)
 		{
 			var selected = DataGridGames.SelectedItem as GameStats;
 			if(selected == null) return;
-			var settings = new MetroDialogSettings();
-			settings.DefaultText = selected.Note;
-			var newNote = await Helper.MainWindow.ShowInputAsync("Note", "", settings);
+			var settings = new MetroDialogSettings {DefaultText = selected.Note};
+			string newNote;
+			if(Config.Instance.StatsInWindow)
+				newNote = await Helper.MainWindow.StatsWindow.ShowInputAsync("Note", "", settings);
+			else
+				newNote = await Helper.MainWindow.ShowInputAsync("Note", "", settings);
 			if(newNote == null)
 				return;
 			selected.Note = newNote;
@@ -234,6 +251,37 @@ namespace Hearthstone_Deck_Tracker
 			else
 				groupBox.Header = "> " + groupBox.Header;
 			return _isGroupBoxExpanded[groupBox];
+		}
+
+		private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+		{
+			//todo: probably not the best performance
+			Refresh();
+		}
+
+		private void BtnMoveToOtherDeck_Click(object sender, RoutedEventArgs e)
+		{
+			var selectedGame = DataGridGames.SelectedItem as GameStats;
+			if(selectedGame == null) return;
+
+			var possibleTargets = Helper.MainWindow.DeckList.DecksList.Where(d => d.Class == _deck.Class);
+
+			var dialog = new MoveGameDialog(possibleTargets);
+			if(Config.Instance.StatsInWindow)
+				dialog.Owner = Helper.MainWindow.StatsWindow;
+			else dialog.Owner = Helper.MainWindow;
+
+			dialog.ShowDialog();
+			var selectedDeck = dialog.SelectedDeck;
+
+			if(selectedDeck == null) return;
+
+			_deck.DeckStats.Games.Remove(selectedGame);
+			selectedDeck.DeckStats.Games.Add(selectedGame);
+			DeckStatsList.Save();
+			Helper.MainWindow.WriteDecks();
+			Refresh();
+			Helper.MainWindow.DeckPickerList.UpdateList();
 		}
 
 		private class WinLoss

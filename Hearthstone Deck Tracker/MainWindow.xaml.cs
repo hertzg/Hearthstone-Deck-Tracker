@@ -47,6 +47,7 @@ namespace Hearthstone_Deck_Tracker
 		public readonly OpponentWindow OpponentWindow;
 		public readonly OverlayWindow Overlay;
 		public readonly PlayerWindow PlayerWindow;
+		public readonly StatsWindow StatsWindow;
 		public readonly TimerWindow TimerWindow;
 		private readonly string _configPath;
 		private readonly string _decksPath;
@@ -188,12 +189,12 @@ namespace Hearthstone_Deck_Tracker
 			PlayerWindow = new PlayerWindow(Config.Instance, Game.IsUsingPremade ? Game.PlayerDeck : Game.PlayerDrawn);
 			OpponentWindow = new OpponentWindow(Config.Instance, Game.OpponentCards);
 			TimerWindow = new TimerWindow(Config.Instance);
+			StatsWindow = new StatsWindow();
 
-			if(Config.Instance.WindowsOnStartup)
-			{
+			if(Config.Instance.PlayerWindowOnStart)
 				PlayerWindow.Show();
+			if(Config.Instance.OpponentWindowOnStart)
 				OpponentWindow.Show();
-			}
 			if(Config.Instance.TimerWindowOnStartup)
 				TimerWindow.Show();
 			if(!DeckList.AllTags.Contains("All"))
@@ -273,19 +274,19 @@ namespace Hearthstone_Deck_Tracker
 				switch(itemName)
 				{
 					case "Deck Title":
-						ElementSorterPlayer.AddItem(new ElementSorterItem("Deck Title", Config.Instance.ShowDeckTitle, (value) => Config.Instance.ShowDeckTitle = value, true));
+						ElementSorterPlayer.AddItem(new ElementSorterItem("Deck Title", Config.Instance.ShowDeckTitle, value => Config.Instance.ShowDeckTitle = value, true));
 						break;
 					case "Cards":
-						ElementSorterPlayer.AddItem(new ElementSorterItem("Cards", !Config.Instance.HidePlayerCards, (value) => Config.Instance.HidePlayerCards = !value, true));
+						ElementSorterPlayer.AddItem(new ElementSorterItem("Cards", !Config.Instance.HidePlayerCards, value => Config.Instance.HidePlayerCards = !value, true));
 						break;
 					case "Card Counter":
-						ElementSorterPlayer.AddItem(new ElementSorterItem("Card Counter", !Config.Instance.HidePlayerCardCount, (value) => Config.Instance.HidePlayerCardCount = !value, true));
+						ElementSorterPlayer.AddItem(new ElementSorterItem("Card Counter", !Config.Instance.HidePlayerCardCount, value => Config.Instance.HidePlayerCardCount = !value, true));
 						break;
 					case "Draw Chances":
-						ElementSorterPlayer.AddItem(new ElementSorterItem("Draw Chances", !Config.Instance.HideDrawChances, (value) => Config.Instance.HideDrawChances = !value, true));
+						ElementSorterPlayer.AddItem(new ElementSorterItem("Draw Chances", !Config.Instance.HideDrawChances, value => Config.Instance.HideDrawChances = !value, true));
 						break;
 					case "Wins":
-						ElementSorterPlayer.AddItem(new ElementSorterItem("Wins", Config.Instance.ShowDeckWins, (value) => Config.Instance.ShowDeckWins = value, true));
+						ElementSorterPlayer.AddItem(new ElementSorterItem("Wins", Config.Instance.ShowDeckWins, value => Config.Instance.ShowDeckWins = value, true));
 						break;
 				}
 			}
@@ -298,16 +299,16 @@ namespace Hearthstone_Deck_Tracker
 				switch(itemName)
 				{
 					case "Cards":
-						ElementSorterOpponent.AddItem(new ElementSorterItem("Cards", !Config.Instance.HideOpponentCards, (value) => Config.Instance.HideOpponentCards = !value, false));
+						ElementSorterOpponent.AddItem(new ElementSorterItem("Cards", !Config.Instance.HideOpponentCards, value => Config.Instance.HideOpponentCards = !value, false));
 						break;
 					case "Card Counter":
-						ElementSorterOpponent.AddItem(new ElementSorterItem("Card Counter", !Config.Instance.HideOpponentCardCount, (value) => Config.Instance.HideOpponentCardCount = !value, false));
+						ElementSorterOpponent.AddItem(new ElementSorterItem("Card Counter", !Config.Instance.HideOpponentCardCount, value => Config.Instance.HideOpponentCardCount = !value, false));
 						break;
 					case "Draw Chances":
-						ElementSorterOpponent.AddItem(new ElementSorterItem("Draw Chances", !Config.Instance.HideOpponentDrawChances, (value) => Config.Instance.HideOpponentDrawChances = !value, false));
+						ElementSorterOpponent.AddItem(new ElementSorterItem("Draw Chances", !Config.Instance.HideOpponentDrawChances, value => Config.Instance.HideOpponentDrawChances = !value, false));
 						break;
 					case "Win Rate":
-						ElementSorterOpponent.AddItem(new ElementSorterItem("Win Rate", Config.Instance.ShowWinRateAgainst, (value) => Config.Instance.ShowWinRateAgainst = value, false));
+						ElementSorterOpponent.AddItem(new ElementSorterItem("Win Rate", Config.Instance.ShowWinRateAgainst, value => Config.Instance.ShowWinRateAgainst = value, false));
 						break;
 				}
 			}
@@ -705,12 +706,20 @@ namespace Hearthstone_Deck_Tracker
 				Config.Instance.TimerWindowHeight = (int)TimerWindow.Height;
 				Config.Instance.TimerWindowWidth = (int)TimerWindow.Width;
 
+				if(!double.IsNaN(StatsWindow.Left))
+					Config.Instance.StatsWindowLeft = (int)StatsWindow.Left;
+				if(!double.IsNaN(StatsWindow.Top))
+					Config.Instance.StatsWindowTop = (int)StatsWindow.Top;
+				Config.Instance.StatsWindowHeight = (int)StatsWindow.Height;
+				Config.Instance.StatsWindowWidth = (int)StatsWindow.Width;
+
 				_notifyIcon.Visible = false;
 				Overlay.Close();
 				HsLogReader.Instance.Stop();
 				TimerWindow.Shutdown();
 				PlayerWindow.Shutdown();
 				OpponentWindow.Shutdown();
+				StatsWindow.Shutdown();
 				Config.Save();
 				WriteDecks();
 			}
@@ -724,13 +733,6 @@ namespace Hearthstone_Deck_Tracker
 		private void BtnSortFilter_Click(object sender, RoutedEventArgs e)
 		{
 			FlyoutSortFilter.IsOpen = !FlyoutSortFilter.IsOpen;
-		}
-
-		private void SortFilterDecksFlyoutOnSelectedTagsChanged(SortFilterDecks sender, List<string> tags)
-		{
-			DeckPickerList.SetSelectedTags(tags);
-			Config.Instance.SelectedTags = tags;
-			Config.Save();
 		}
 
 		private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
@@ -881,7 +883,8 @@ namespace Hearthstone_Deck_Tracker
 			CheckboxKeepDecksVisible.IsChecked = Config.Instance.KeepDecksVisible;
 			CheckboxMinimizeTray.IsChecked = Config.Instance.MinimizeToTray;
 			CheckboxWindowsTopmost.IsChecked = Config.Instance.WindowsTopmost;
-			CheckboxWindowsOpenAutomatically.IsChecked = Config.Instance.WindowsOnStartup;
+			CheckboxPlayerWindowOpenAutomatically.IsChecked = Config.Instance.PlayerWindowOnStart;
+			CheckboxOpponentWindowOpenAutomatically.IsChecked = Config.Instance.OpponentWindowOnStart;
 			CheckboxTimerTopmost.IsChecked = Config.Instance.TimerWindowTopmost;
 			CheckboxTimerWindow.IsChecked = Config.Instance.TimerWindowOnStartup;
 			CheckboxTimerTopmostHsForeground.IsChecked = Config.Instance.TimerWindowTopmostIfHsForeground;
@@ -916,6 +919,7 @@ namespace Hearthstone_Deck_Tracker
 			CheckboxGoldenFeugen.IsChecked = Config.Instance.OwnsGoldenFeugen;
 			CheckboxGoldenStalagg.IsChecked = Config.Instance.OwnsGoldenStalagg;
 			CheckboxCloseWithHearthstone.IsChecked = Config.Instance.CloseWithHearthstone;
+			CheckboxStatsInWindow.IsChecked = Config.Instance.StatsInWindow;
 
 			SliderOverlayOpacity.Value = Config.Instance.OverlayOpacity;
 			SliderOpponentOpacity.Value = Config.Instance.OpponentOpacity;
@@ -927,11 +931,9 @@ namespace Hearthstone_Deck_Tracker
 			DeckPickerList.SetSelectedTags(Config.Instance.SelectedTags);
 
 			CheckboxHideTimers.IsChecked = Config.Instance.HideTimers;
-			SliderTimersHorizontalSpacing.Value = Config.Instance.TimersHorizontalSpacing;
-			SliderTimersVerticalSpacing.Value = Config.Instance.TimersVerticalSpacing;
 
 			var delay = Config.Instance.DeckExportDelay;
-			ComboboxExportSpeed.SelectedIndex = delay < 50 ? 0 : delay < 75 ? 1 : delay < 125 ? 2 : delay < 250 ? 3 : 4;
+			ComboboxExportSpeed.SelectedIndex = delay < 40 ? 0 : delay < 60 ? 1 : delay < 100 ? 2 : delay < 150 ? 3 : 4;
 
 			SortFilterDecksFlyout.LoadTags(DeckList.AllTags);
 
@@ -953,11 +955,6 @@ namespace Hearthstone_Deck_Tracker
 				                               ? "#696969"
 				                               : Config.Instance.WindowsBackgroundHex;
 			UpdateAdditionalWindowsBackground();
-
-			Overlay.SetOpponentTextLocation(Config.Instance.TextOnTopOpponent);
-			OpponentWindow.SetTextLocation(Config.Instance.TextOnTopOpponent);
-			Overlay.SetPlayerTextLocation(Config.Instance.TextOnTopPlayer);
-			PlayerWindow.SetTextLocation(Config.Instance.TextOnTopPlayer);
 
 			if(Helper.LanguageDict.Values.Contains(Config.Instance.SelectedLanguage))
 				ComboboxLanguages.SelectedItem = Helper.LanguageDict.First(x => x.Value == Config.Instance.SelectedLanguage).Key;
@@ -985,6 +982,8 @@ namespace Hearthstone_Deck_Tracker
 
 			DeckStatsFlyout.LoadConfig();
 			GameDetailsFlyout.LoadConfig();
+			StatsWindow.StatsControl.LoadConfig();
+			StatsWindow.GameDetailsFlyout.LoadConfig();
 		}
 
 		private async void UpdateOverlayAsync()
@@ -1234,10 +1233,19 @@ namespace Hearthstone_Deck_Tracker
 
 		private void BtnDeckStats_Click(object sender, RoutedEventArgs e)
 		{
-			FlyoutDeckStats.IsOpen = true;
 			var deck = DeckPickerList.SelectedDeck;
-			if(deck != null)
+			if(Config.Instance.StatsInWindow)
+			{
+				StatsWindow.StatsControl.SetDeck(deck);
+				StatsWindow.WindowState = WindowState.Normal;
+				StatsWindow.Show();
+				StatsWindow.Activate();
+			}
+			else
+			{
 				DeckStatsFlyout.SetDeck(deck);
+				FlyoutDeckStats.IsOpen = true;
+			}
 		}
 
 		private void BtnDeckOptions_Click(object sender, RoutedEventArgs e)
@@ -1276,26 +1284,6 @@ namespace Hearthstone_Deck_Tracker
 			Helper.SortCardCollection(ListViewDeck.Items, Config.Instance.CardSortingClassFirst);
 			Config.Instance.LastDeck = selected.Name;
 			Config.Save();
-		}
-
-		public async Task<MessageDialogResult> ShowDeleteGameStatsMessage(GameStats stats)
-		{
-			var settings = new MetroDialogSettings {AffirmativeButtonText = "Yes", NegativeButtonText = "No"};
-			return
-				await
-				this.ShowMessageAsync("Delete Game",
-				                      stats.Result + " vs " + stats.OpponentHero + "\nfrom " + stats.StartTime + "\n\nAre you sure?",
-				                      MessageDialogStyle.AffirmativeAndNegative, settings);
-		}
-
-		public async Task<MessageDialogResult> ShowDeleteMultipleGameStatsMessage(int count)
-		{
-			var settings = new MetroDialogSettings {AffirmativeButtonText = "Yes", NegativeButtonText = "No"};
-			return
-				await
-				this.ShowMessageAsync("Delete Games",
-				                      "This will delete the selected games (" + count + ").\n\nAre you sure?",
-				                      MessageDialogStyle.AffirmativeAndNegative, settings);
 		}
 
 		#endregion
@@ -1509,16 +1497,20 @@ namespace Hearthstone_Deck_Tracker
 			{
 				ListViewDB.Items.Clear();
 
+				var formattedInput = Helper.RemoveDiacritics(TextBoxDBFilter.Text.ToLowerInvariant(), true);
+				var words = formattedInput.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
+
 				foreach(var card in Game.GetActualCards())
 				{
-					var words = TextBoxDBFilter.Text.ToLowerInvariant().Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
-					if(!Config.Instance.UseFullTextSearch && !card.LocalizedName.ToLowerInvariant().Contains(TextBoxDBFilter.Text.ToLowerInvariant()))
+					var cardName = Helper.RemoveDiacritics(card.LocalizedName.ToLowerInvariant(), true);
+					if(!Config.Instance.UseFullTextSearch && !cardName.Contains(formattedInput))
 						continue;
-					if(Config.Instance.UseFullTextSearch && words.Any(w => !card.LocalizedName.ToLowerInvariant().Contains(w)
+					if(Config.Instance.UseFullTextSearch && words.Any(w => !cardName.Contains(w)
 					                                                       && !(!string.IsNullOrEmpty(card.Text) && card.Text.ToLowerInvariant().Contains(w))
 					                                                       && (!string.IsNullOrEmpty(card.RaceOrType) && w != card.RaceOrType.ToLowerInvariant())
 					                                                       && (!string.IsNullOrEmpty(card.Rarity) && w != card.Rarity.ToLowerInvariant())))
 						continue;
+
 					// mana filter
 					if(ComboBoxFilterMana.SelectedItem.ToString() == "All"
 					   || ((ComboBoxFilterMana.SelectedItem.ToString() == "9+" && card.Cost >= 9)
@@ -1810,60 +1802,6 @@ namespace Hearthstone_Deck_Tracker
 			SaveConfig(true);
 		}
 
-		private void CheckboxHideDrawChances_Checked(object sender, RoutedEventArgs e)
-		{
-			if(!_initialized) return;
-			Config.Instance.HideDrawChances = true;
-			SaveConfig(true);
-			PlayerWindow.LblDrawChance1.Visibility = Visibility.Collapsed;
-			PlayerWindow.LblDrawChance2.Visibility = Visibility.Collapsed;
-		}
-
-		private void CheckboxHideDrawChances_Unchecked(object sender, RoutedEventArgs e)
-		{
-			if(!_initialized) return;
-			Config.Instance.HideDrawChances = false;
-			SaveConfig(true);
-			PlayerWindow.LblDrawChance1.Visibility = Visibility.Visible;
-			PlayerWindow.LblDrawChance2.Visibility = Visibility.Visible;
-		}
-
-		private void CheckboxHideOpponentDrawChances_Checked(object sender, RoutedEventArgs e)
-		{
-			if(!_initialized) return;
-			Config.Instance.HideOpponentDrawChances = true;
-			SaveConfig(true);
-			OpponentWindow.LblOpponentDrawChance2.Visibility = Visibility.Collapsed;
-			OpponentWindow.LblOpponentDrawChance1.Visibility = Visibility.Collapsed;
-		}
-
-		private void CheckboxHideOpponentDrawChances_Unchecked(object sender, RoutedEventArgs e)
-		{
-			if(!_initialized) return;
-			Config.Instance.HideOpponentDrawChances = false;
-			SaveConfig(true);
-			OpponentWindow.LblOpponentDrawChance2.Visibility = Visibility.Visible;
-			OpponentWindow.LblOpponentDrawChance1.Visibility = Visibility.Visible;
-		}
-
-		private void CheckboxHideOpponentCardCounter_Checked(object sender, RoutedEventArgs e)
-		{
-			if(!_initialized) return;
-			Config.Instance.HideOpponentCardCount = true;
-			SaveConfig(true);
-			OpponentWindow.LblOpponentCardCount.Visibility = Visibility.Collapsed;
-			OpponentWindow.LblOpponentDeckCount.Visibility = Visibility.Collapsed;
-		}
-
-		private void CheckboxHideOpponentCardCounter_Unchecked(object sender, RoutedEventArgs e)
-		{
-			if(!_initialized) return;
-			Config.Instance.HideOpponentCardCount = false;
-			SaveConfig(true);
-			OpponentWindow.LblOpponentCardCount.Visibility = Visibility.Visible;
-			OpponentWindow.LblOpponentDeckCount.Visibility = Visibility.Visible;
-		}
-
 		private void CheckboxHideOpponentCardAge_Unchecked(object sender, RoutedEventArgs e)
 		{
 			if(!_initialized) return;
@@ -1924,31 +1862,6 @@ namespace Hearthstone_Deck_Tracker
 			OpponentWindow.Topmost = false;
 			CheckboxWinTopmostHsForeground.IsEnabled = false;
 			CheckboxWinTopmostHsForeground.IsChecked = false;
-			SaveConfig(true);
-		}
-
-		private void CheckboxWindowsOpenAutomatically_Checked(object sender, RoutedEventArgs e)
-		{
-			if(!_initialized) return;
-			PlayerWindow.Show();
-			PlayerWindow.Activate();
-			OpponentWindow.Show();
-			OpponentWindow.Activate();
-
-			PlayerWindow.SetCardCount(Game.PlayerHandCount, 30 - Game.PlayerDrawn.Where(c => !c.IsStolen).Sum(card => card.Count));
-
-			OpponentWindow.SetOpponentCardCount(Game.OpponentHandCount, Game.OpponentDeckCount, Game.OpponentHasCoin);
-
-			Config.Instance.WindowsOnStartup = true;
-			SaveConfig(true);
-		}
-
-		private void CheckboxWindowsOpenAutomatically_Unchecked(object sender, RoutedEventArgs e)
-		{
-			if(!_initialized) return;
-			PlayerWindow.Hide();
-			OpponentWindow.Hide();
-			Config.Instance.WindowsOnStartup = false;
 			SaveConfig(true);
 		}
 
@@ -2168,20 +2081,6 @@ namespace Hearthstone_Deck_Tracker
 		{
 			if(!_initialized) return;
 			Config.Instance.HideTimers = false;
-			SaveConfig(true);
-		}
-
-		private void SliderTimersHorizontalSpacing_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-		{
-			if(!_initialized) return;
-			Config.Instance.TimersHorizontalSpacing = SliderTimersHorizontalSpacing.Value;
-			SaveConfig(true);
-		}
-
-		private void SliderTimersVerticalSpacing_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-		{
-			if(!_initialized) return;
-			Config.Instance.TimersVerticalSpacing = SliderTimersVerticalSpacing.Value;
 			SaveConfig(true);
 		}
 
@@ -2561,21 +2460,22 @@ namespace Hearthstone_Deck_Tracker
 				BtnUnlockOverlay.Content = "Unlock";
 			}
 
-			var defaultConfig = new Config();
+			Config.Instance.PlayerDeckTop = Config.Defaults.PlayerDeckTop;
+			Config.Instance.PlayerDeckLeft = Config.Defaults.PlayerDeckLeft;
+			Config.Instance.PlayerDeckHeight = Config.Defaults.PlayerDeckHeight;
 
-			Config.Instance.PlayerDeckTop = defaultConfig.PlayerDeckTop;
-			Config.Instance.PlayerDeckLeft = defaultConfig.PlayerDeckLeft;
-			Config.Instance.PlayerDeckHeight = defaultConfig.PlayerDeckHeight;
+			Config.Instance.OpponentDeckTop = Config.Defaults.OpponentDeckTop;
+			Config.Instance.OpponentDeckLeft = Config.Defaults.OpponentDeckLeft;
+			Config.Instance.OpponentDeckHeight = Config.Defaults.OpponentDeckHeight;
 
-			Config.Instance.OpponentDeckTop = defaultConfig.OpponentDeckTop;
-			Config.Instance.OpponentDeckLeft = defaultConfig.OpponentDeckLeft;
-			Config.Instance.OpponentDeckHeight = defaultConfig.OpponentDeckHeight;
+			Config.Instance.TimersHorizontalPosition = Config.Defaults.TimersHorizontalPosition;
+			Config.Instance.TimersHorizontalSpacing = Config.Defaults.TimersHorizontalSpacing;
 
-			Config.Instance.TimersHorizontalPosition = defaultConfig.TimersHorizontalPosition;
-			Config.Instance.TimersHorizontalSpacing = defaultConfig.TimersHorizontalSpacing;
+			Config.Instance.TimersHorizontalSpacing = Config.Defaults.TimersHorizontalSpacing;
+			Config.Instance.TimersVerticalSpacing = Config.Defaults.TimersVerticalSpacing;
 
-			Config.Instance.SecretsTop = defaultConfig.SecretsTop;
-			Config.Instance.SecretsLeft = defaultConfig.SecretsLeft;
+			Config.Instance.SecretsTop = Config.Defaults.SecretsTop;
+			Config.Instance.SecretsLeft = Config.Defaults.SecretsLeft;
 
 			SaveConfig(true);
 		}
@@ -2884,6 +2784,56 @@ namespace Hearthstone_Deck_Tracker
 		{
 			if(!_initialized) return;
 			Config.Instance.CloseWithHearthstone = false;
+			Config.Save();
+		}
+
+		private void CheckboxStatsInWindow_Checked(object sender, RoutedEventArgs e)
+		{
+			if(!_initialized) return;
+			Config.Instance.StatsInWindow = true;
+			Config.Save();
+		}
+
+		private void CheckboxStatsInWindow_Unchecked(object sender, RoutedEventArgs e)
+		{
+			if(!_initialized) return;
+			Config.Instance.StatsInWindow = false;
+			Config.Save();
+		}
+
+		private void CheckboxPlayerWindowOpenAutomatically_Checked(object sender, RoutedEventArgs e)
+		{
+			if(!_initialized) return;
+			PlayerWindow.Show();
+			PlayerWindow.Activate();
+			PlayerWindow.SetCardCount(Game.PlayerHandCount, 30 - Game.PlayerDrawn.Where(c => !c.IsStolen).Sum(card => card.Count));
+			Config.Instance.PlayerWindowOnStart = true;
+			Config.Save();
+		}
+
+		private void CheckboxPlayerWindowOpenAutomatically_Unchecked(object sender, RoutedEventArgs e)
+		{
+			if(!_initialized) return;
+			PlayerWindow.Hide();
+			Config.Instance.PlayerWindowOnStart = false;
+			Config.Save();
+		}
+
+		private void CheckboxOpponentWindowOpenAutomatically_Checked(object sender, RoutedEventArgs e)
+		{
+			if(!_initialized) return;
+			OpponentWindow.Show();
+			OpponentWindow.Activate();
+			OpponentWindow.SetOpponentCardCount(Game.OpponentHandCount, Game.OpponentDeckCount, Game.OpponentHasCoin);
+			Config.Instance.OpponentWindowOnStart = true;
+			Config.Save();
+		}
+
+		private void CheckboxOpponentWindowOpenAutomatically_Unchecked(object sender, RoutedEventArgs e)
+		{
+			if(!_initialized) return;
+			OpponentWindow.Hide();
+			Config.Instance.OpponentWindowOnStart = false;
 			Config.Save();
 		}
 

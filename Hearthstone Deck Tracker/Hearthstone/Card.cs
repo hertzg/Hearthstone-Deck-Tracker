@@ -30,13 +30,17 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
 		private string _text;
 		private bool _wasDiscarded;
 
+        /// The mechanics attribute, such as windfury or taunt, comes from the cardDB json file
+        [XmlIgnore]
+        public string[] Mechanics;
+
 		public Card()
 		{
 			Count = 1;
 		}
 
 		public Card(string id, string playerClass, string rarity, string type, string name, int cost, string localizedName,
-		            int inHandCount, int count, string text, int attack, int health, string race, int? durability)
+		            int inHandCount, int count, string text, int attack, int health, string race, string [] mechanics, int? durability)
 		{
 			Id = id;
 			PlayerClass = playerClass;
@@ -52,6 +56,8 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
 			Health = health;
 			Race = race;
 			Durability = durability;
+            Mechanics = mechanics;
+            
 		}
 
 		public int Count
@@ -242,49 +248,48 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
 
 
 					//card graphic
-					var group = new DrawingGroup();
+					var drawingGroup = new DrawingGroup();
 
 					if(File.Exists("Images/" + cardFileName))
 					{
-						group.Children.Add(
+						drawingGroup.Children.Add(
 							new ImageDrawing(new BitmapImage(new Uri("Images/" + cardFileName, UriKind.Relative)),
 							                 new Rect(104, 1, 110, 34)));
 					}
 
 					//frame
-					group.Children.Add(
+					drawingGroup.Children.Add(
 						new ImageDrawing(new BitmapImage(new Uri("Images/frame.png", UriKind.Relative)),
 						                 new Rect(0, 0, 218, 35)));
 
 					//extra info?
 					if(Count >= 2 || Rarity == "Legendary")
 					{
-						group.Children.Add(new ImageDrawing(new BitmapImage(new Uri("Images/frame_countbox.png", UriKind.Relative)),
-						                                    new Rect(189, 6, 25, 24)));
+						drawingGroup.Children.Add(new ImageDrawing(new BitmapImage(new Uri("Images/frame_countbox.png", UriKind.Relative)),
+						                                           new Rect(189, 6, 25, 24)));
 
 						if(Count >= 2 && Count <= 9)
 						{
-							group.Children.Add(new ImageDrawing(
-								                   new BitmapImage(new Uri("Images/frame_" + Count + ".png", UriKind.Relative)),
-								                   new Rect(194, 8, 18, 21)));
+							drawingGroup.Children.Add(new ImageDrawing(
+								                          new BitmapImage(new Uri("Images/frame_" + Count + ".png", UriKind.Relative)),
+								                          new Rect(194, 8, 18, 21)));
 						}
 						else
 						{
-							group.Children.Add(new ImageDrawing(new BitmapImage(new Uri("Images/frame_legendary.png", UriKind.Relative)),
-							                                    new Rect(194, 8, 18, 21)));
+							drawingGroup.Children.Add(new ImageDrawing(new BitmapImage(new Uri("Images/frame_legendary.png", UriKind.Relative)),
+							                                           new Rect(194, 8, 18, 21)));
 						}
 					}
 
 					//dark overlay
 					if(Count == 0)
 					{
-						group.Children.Add(
+						drawingGroup.Children.Add(
 							new ImageDrawing(new BitmapImage(new Uri("Images/dark.png", UriKind.Relative)),
 							                 new Rect(0, 0, 218, 35)));
 					}
 
-					var brush = new ImageBrush();
-					brush.ImageSource = new DrawingImage(group);
+					var brush = new ImageBrush {ImageSource = new DrawingImage(drawingGroup)};
 					return brush;
 				}
 				catch(Exception)
@@ -296,8 +301,9 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
 
 		public object Clone()
 		{
-			return new Card(Id, PlayerClass, Rarity, Type, Name, Cost, LocalizedName, InHandCount, Count, Text, Attack, Health,
-			                Race, Durability);
+			Card newcard = new Card(Id, PlayerClass, Rarity, Type, Name, Cost, LocalizedName, InHandCount, Count, Text, Attack, Health,
+			                Race, Mechanics, Durability);
+            return newcard;
 		}
 
 		public event PropertyChangedEventHandler PropertyChanged;
@@ -337,6 +343,7 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
 			Health = stats.Health;
 			Race = stats.Race;
 			Durability = stats.Durability;
+            Mechanics = stats.Mechanics;
 			_wasDiscarded = false;
 			OnPropertyChanged();
 		}
@@ -361,3 +368,4 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
 		}
 	}
 }
+

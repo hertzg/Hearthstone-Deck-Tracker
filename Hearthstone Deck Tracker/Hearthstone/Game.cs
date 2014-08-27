@@ -186,26 +186,24 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
 			var deckCard = PlayerDeck.FirstOrDefault(c => c.Id == cardId);
 			if(deckCard == null)
 				return false;
-			else
-			{
-				deckCard.Count--;
-				deckCard.InHandCount++;
-				LogDeckChange(false, deckCard, true);
-				if(deckCard.Count == 0 && Config.Instance.RemoveCardsFromDeck && !Config.Instance.HighlightCardsInHand)
-				{
-					//wait for just-drawn highlight to be over, then doublecheck (coule be back in deck after e.g.) -> remove
-					await deckCard.JustDrawn();
-					if(deckCard.Count == 0)
-					{
-						PlayerDeck.Remove(deckCard);
-						Logger.WriteLine("Removed " + deckCard.Name + " from deck (count 0)");
-					}
-				}
-				else
-					deckCard.JustDrawn();
 
-				return true;
+			deckCard.Count--;
+			deckCard.InHandCount++;
+			LogDeckChange(false, deckCard, true);
+			if(deckCard.Count == 0 && Config.Instance.RemoveCardsFromDeck && !Config.Instance.HighlightCardsInHand)
+			{
+				//wait for just-drawn highlight to be over, then doublecheck (coule be back in deck after e.g.) -> remove
+				await deckCard.JustDrawn();
+				if(deckCard.Count == 0)
+				{
+					PlayerDeck.Remove(deckCard);
+					Logger.WriteLine("Removed " + deckCard.Name + " from deck (count 0)");
+				}
 			}
+			else
+				deckCard.JustDrawn();
+
+			return true;
 		}
 #pragma warning restore 4014
 
@@ -340,15 +338,13 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
 			var deckCard = PlayerDeck.FirstOrDefault(c => c.Id == cardId);
 			if(deckCard == null)
 				return false;
-			else
-			{
-				deckCard.Count--;
-				LogDeckChange(false, deckCard, true);
-				if(CanRemoveCard(deckCard))
-					PlayerDeck.Remove(deckCard);
 
-				return true;
-			}
+			deckCard.Count--;
+			LogDeckChange(false, deckCard, true);
+			if(CanRemoveCard(deckCard))
+				PlayerDeck.Remove(deckCard);
+
+			return true;
 		}
 
 		#endregion
@@ -362,7 +358,7 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
 
 			if(!ValidateOpponentHandCount())
 				return;
-			else if(OpponentHandAge[OpponentHandCount - 1] != -1)
+			if(OpponentHandAge[OpponentHandCount - 1] != -1)
 				Logger.WriteLine(string.Format("Card {0} is already set to {1}", OpponentHandCount - 1, OpponentHandAge[OpponentHandCount - 1]), "Hearthstone");
 			else
 			{
@@ -530,15 +526,16 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
 
 
 				//load engish db (needed for importing, etc)
-				var fileEng = "Files/cardsDB.enUS.json";
+				const string fileEng = "Files/cardsDB.enUS.json";
 				var tempDb = new Dictionary<string, Card>();
 				if(File.Exists(fileEng))
 				{
 					var obj = JObject.Parse(File.ReadAllText(fileEng));
 					foreach(var cardType in obj)
 					{
+                        
 						if(!ValidCardSets.Any(cs => cs.Equals(cardType.Key))) continue;
-						;
+
 						foreach(var card in cardType.Value)
 						{
 							var tmp = JsonConvert.DeserializeObject<Card>(card.ToString());
@@ -568,21 +565,21 @@ namespace Hearthstone_Deck_Tracker.Hearthstone
 			if(_cardDb.ContainsKey(cardId))
 				return (Card)_cardDb[cardId].Clone();
 			Logger.WriteLine("Could not find entry in db for cardId: " + cardId);
-			return new Card(cardId, null, "UNKNOWN", "Minion", "UNKNOWN", 0, "UNKNOWN", 0, 1, "", 0, 0, "UNKNOWN", 0);
+			return new Card(cardId, null, "UNKNOWN", "Minion", "UNKNOWN", 0, "UNKNOWN", 0, 1, "", 0, 0, "UNKNOWN", null, 0);
 		}
 
 		public static Card GetCardFromName(string name)
 		{
 			if(GetActualCards().Any(c => c.Name.Equals(name)))
 			{
-				return
-					(Card)
-					GetActualCards().FirstOrDefault(c => c.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase)).Clone();
+				var card = GetActualCards().FirstOrDefault(c => c.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase));
+				if(card != null)
+					return (Card)card.Clone();
 			}
 
 			//not sure with all the values here
 			Logger.WriteLine("Could not get card from name: " + name);
-			return new Card("UNKNOWN", null, "UNKNOWN", "Minion", name, 0, name, 0, 1, "", 0, 0, "UNKNOWN", 0);
+			return new Card("UNKNOWN", null, "UNKNOWN", "Minion", name, 0, name, 0, 1, "", 0, 0, "UNKNOWN", null, 0);
 		}
 
 		public static List<Card> GetActualCards()

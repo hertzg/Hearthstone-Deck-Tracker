@@ -3,9 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
@@ -48,7 +50,7 @@ namespace Hearthstone_Deck_Tracker
 			Logger.WriteLine("Checking for updates...");
 			newVersionOut = null;
 
-			var versionXmlUrl = @"https://raw.githubusercontent.com/Epix37/Hearthstone-Deck-Tracker/master/Hearthstone%20Deck%20Tracker/Version.xml";
+			const string versionXmlUrl = @"https://raw.githubusercontent.com/Epix37/Hearthstone-Deck-Tracker/master/Hearthstone%20Deck%20Tracker/Version.xml";
 
 			var currentVersion = GetCurrentVersion();
 
@@ -179,7 +181,7 @@ namespace Hearthstone_Deck_Tracker
 
 			view1.SortDescriptions.Add(new SortDescription("Cost", ListSortDirection.Ascending));
 			view1.SortDescriptions.Add(new SortDescription("Type", ListSortDirection.Descending));
-			view1.SortDescriptions.Add(new SortDescription("Name", ListSortDirection.Ascending));
+			view1.SortDescriptions.Add(new SortDescription("LocalizedName", ListSortDirection.Ascending));
 		}
 
 		public static string DeckToIdString(Deck deck)
@@ -288,6 +290,28 @@ namespace Hearthstone_Deck_Tracker
 				var dest = Path.Combine(destFolder, name);
 				CopyFolder(folder, dest);
 			}
+		}
+
+
+		//http://stackoverflow.com/questions/3769457/how-can-i-remove-accents-on-a-string
+		public static string RemoveDiacritics(string src, bool compatNorm)
+		{
+			var sb = new StringBuilder();
+			foreach(var c in src.Normalize(compatNorm ? NormalizationForm.FormKD : NormalizationForm.FormD))
+			{
+				switch(CharUnicodeInfo.GetUnicodeCategory(c))
+				{
+					case UnicodeCategory.NonSpacingMark:
+					case UnicodeCategory.SpacingCombiningMark:
+					case UnicodeCategory.EnclosingMark:
+						break;
+					default:
+						sb.Append(c);
+						break;
+				}
+			}
+
+			return sb.ToString();
 		}
 	}
 }

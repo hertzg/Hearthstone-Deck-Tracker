@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
 using Hearthstone_Deck_Tracker.Hearthstone;
+using HtmlAgilityPack;
 using HtmlDocument = HtmlAgilityPack.HtmlDocument;
 
 namespace Hearthstone_Deck_Tracker
@@ -42,33 +43,54 @@ namespace Hearthstone_Deck_Tracker
 			{
 				var deck = new Deck {Name = "Arena " + DateTime.Now.ToString("dd-MM hh:mm")};
 
-				const string baseUrl = @"http://www.arenavalue.com/helper/getdata.php?deck=";
+				const string baseUrl = @"http://www.arenavalue.com/deckpopout.php?id=";
 				var newUrl = baseUrl + url.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries).Last();
 
-				var doc = await GetHtmlDoc(newUrl, "X-Requested-With", "XMLHttpRequest");
 
-				var idRegex = new Regex(@"\w*(""(?<id1>(\w*))_(?<id2>(\w*))"")\w*");
-				if(idRegex.IsMatch(doc.DocumentNode.InnerText))
+				HtmlNodeCollection nodes = null;
+				using(var wb = new WebBrowser())
 				{
-					var matches = idRegex.Matches(doc.DocumentNode.InnerText);
-					foreach(Match match in matches)
-					{
-						var cardId = match.Groups["id1"] + "_" + match.Groups["id2"];
-						var card = deck.Cards.FirstOrDefault(c => c.Id == cardId);
-						if(card != null)
-							card.Count++;
-						else
-						{
-							card = Game.GetCardFromId(cardId);
-							deck.Cards.Add(card);
-						}
+					var done = false;
+					wb.Navigate(newUrl + "#" + DateTime.Now.Ticks);
+					wb.DocumentCompleted += (sender, args) => done = true;
 
-						if(string.IsNullOrEmpty(deck.Class) && card.GetPlayerClass != "Neutral")
-							deck.Class = card.PlayerClass;
+					while(!done)
+						await Task.Delay(50);
+
+					for(var i = 0; i < 20; i++)
+					{
+						var doc = new HtmlDocument();
+						doc.Load(wb.DocumentStream);
+						if((nodes = doc.DocumentNode.SelectNodes("//*[@id='deck']/div[@class='deck screenshot']")) != null)
+						{
+							try
+							{
+								if(nodes.Sum(x => int.Parse(x.Attributes["data-count"].Value)) == 30)
+									break;
+							}
+							catch
+							{
+							}
+						}
+						await Task.Delay(500);
 					}
 				}
-				else
+
+				if(nodes == null)
 					return null;
+
+				foreach(var node in nodes)
+				{
+					var cardId = node.Attributes["data-original"].Value;
+					int count;
+					int.TryParse(node.Attributes["data-count"].Value, out count);
+					var card = Game.GetCardFromId(cardId);
+					card.Count = count;
+					deck.Cards.Add(card);
+
+					if(string.IsNullOrEmpty(deck.Class) && card.GetPlayerClass != "Neutral")
+						deck.Class = card.PlayerClass;
+				}
 
 				return deck;
 			}
@@ -370,20 +392,18 @@ namespace Hearthstone_Deck_Tracker
 				var doc = new HtmlDocument();
 				//                  avoid cache
 				wb.Navigate(url + "?" + DateTime.Now.Ticks);
-				wb.DocumentCompleted += (sender, args) =>
-					{
-						doc.Load(wb.DocumentStream);
-						done = true;
-					};
+				wb.DocumentCompleted += (sender, args) => done = true;
+
 				while(!done)
 					await Task.Delay(50);
+				doc.Load(wb.DocumentStream);
 				return doc;
 			}
 		}
 
 		public static async Task<List<string>> GetPopularDeckLists()
 		{
-			var url = @"http://hearthstats.net/decks/public?class=&items=500&sort=num_users&order=desc";
+			const string url = @"http://hearthstats.net/decks/public?class=&items=500&sort=num_users&order=desc";
 
 			var doc = await GetHtmlDoc(url);
 
